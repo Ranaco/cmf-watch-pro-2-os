@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "type": "sync_response",
+  "id": 2,
+  "reply_to": 1,
+  "payload": {
+    "revision": 42,
+    "state": {
+      "weather": { "temperature": 28 },
+      "steps": 7421,
+      "music": { "title": "Nothing playing", "playing": false }
+    }
+  }
+}

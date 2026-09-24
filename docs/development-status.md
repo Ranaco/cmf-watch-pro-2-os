@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 5 — offline watch application registry (complete).
+Phase 6 — versioned host/watch protocol specification (complete).
 
 ## Completed tasks
 
@@ -32,6 +32,9 @@ Phase 5 — offline watch application registry (complete).
 - Registered Home, Notifications, Music, Assistant, and Settings.
 - Added a circular Home app dock and verified every app opens without a host connection.
 - Extended core tests to validate registry size, lookup, screen mapping, and offline capability.
+- Defined the strict protocol v1 envelope, message taxonomy, state revision rules, reconnect sequence, limits, and error policy.
+- Added JSON Schema validation and representative connection, synchronization, state, event, and command packets.
+- Added positive, negative, required-payload, registry-consistency, and version compatibility tests.
 
 ## Environment
 
@@ -59,11 +62,11 @@ None.
 
 The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Builds still succeed; this affects build speed only.
 
-None for Phase 5.
+None for Phase 6.
 
 ## Next task
 
-Phase 6 — specify the versioned host/watch protocol and add schema examples and compatibility tests before implementing transport.
+Phase 7 — implement transport interfaces on watch and host, with localhost TCP as the first backend and no BLE work.
 
 ## Hardware safety
 

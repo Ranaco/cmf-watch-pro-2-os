@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cmf-watch.local/schema/protocol/v1/message.schema.json",
+  "title": "CMF Watch Protocol v1 Message",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "type", "id", "payload"],
+  "properties": {
+    "version": { "const": 1 },
+    "type": {
+      "enum": [
+        "state_set", "state_patch", "list_insert", "list_remove", "list_update",
+        "refresh", "app_open", "show_toast", "show_dialog", "cache_invalidate",
+        "app_opened", "action", "button", "gesture", "input", "refresh_request",
+        "hello", "capabilities", "ping", "pong", "sync_request", "sync_response"
+      ]
+    },
+    "id": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "reply_to": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "timestamp_ms": { "type": "integer", "minimum": 0 },
+    "payload": { "type": "object" }
+  }
+}
+

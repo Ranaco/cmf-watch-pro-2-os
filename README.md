@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Phase 5 complete: round simulator, layered runtime, and five-app offline registry.
+Phase 6 complete: round simulator, layered runtime, five-app offline registry, and tested protocol v1 specification.
 
 ## Run
 
@@ -22,6 +22,7 @@ Run all current checks with:
 ```bash
 ./scripts/test-core.sh
 ./scripts/check-simulator.sh
+./scripts/test-protocol.sh
 ```
 
 ## Workspaces

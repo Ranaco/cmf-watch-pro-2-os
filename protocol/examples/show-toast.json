@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "type": "show_toast",
+  "id": 84,
+  "payload": {
+    "message": "Host reconnected",
+    "duration_ms": 1800
+  }
+}

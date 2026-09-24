@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "type": "state_patch",
+  "id": 82,
+  "payload": {
+    "path": "weather.temperature",
+    "value": 28,
+    "revision": 43
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "type": "action",
+  "id": 83,
+  "payload": {
+    "app_id": "music",
+    "action_id": "play",
+    "arguments": {}
+  }
+}
