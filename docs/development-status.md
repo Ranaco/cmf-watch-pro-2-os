@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 6 — versioned host/watch protocol specification (complete).
+Phase 7 — C/Rust codecs and localhost TCP transport (complete).
 
 ## Completed tasks
 
@@ -39,6 +39,11 @@ Phase 6 — versioned host/watch protocol specification (complete).
 - Defined host/watch state ownership, registered leaf-only patch paths, exact revision sequencing, and atomic snapshot replacement during synchronization.
 - Added session-scoped message identity, command results with stable status/error codes, bootstrap negotiation, and exact newline-delimited UTF-8 framing rules.
 - Added shared conformance fixtures for future C and Rust codecs, covering patch application, stale revisions, revision gaps, and command failures.
+- Added the Rust host crate with bounded UTF-8/LF framing, protocol validation, revision sequencing, atomic snapshot installation, and buffered replay.
+- Ran the Rust state engine against the shared protocol fixtures and added framing, ownership, negotiation, and synchronization tests.
+- Added the Zephyr C protocol codec with the same 16,384-byte framing limit, UTF-8 validation, registered message types, required-field checks, and additive-field compatibility.
+- Added a simulator-only localhost TCP backend with automatic reconnect and session-scoped watch identity.
+- Verified an end-to-end Rust/Zephyr exchange of `hello`, `capabilities`, `sync_request`, and `sync_response` while preserving completely offline watch navigation.
 
 ## Environment
 
@@ -68,7 +73,7 @@ The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Bu
 
 ## Next task
 
-Phase 7 — implement the C/watch and Rust/host codecs against the shared fixtures, then connect them through the existing transport interfaces using localhost TCP as the first backend. No BLE work.
+Phase 8 — dispatch decoded host mutations through a watch-side synchronization/state service, then render synchronized weather, notification, and music data without coupling transport or protocol code to LVGL. No BLE work.
 
 ## Hardware safety
 

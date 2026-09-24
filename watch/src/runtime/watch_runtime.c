@@ -78,6 +78,7 @@ int watch_runtime_run(void)
 	LOG_INF("CMF simulator ready at round 466x466 (offline=%d)",
 		!transport_connected());
 	while (true) {
+		transport_poll();
 		if (watch_input_poll() == WATCH_INPUT_HARDWARE_BUTTON) {
 			handle_action(RENDERER_ACTION_OPEN_NOTIFICATIONS);
 		}

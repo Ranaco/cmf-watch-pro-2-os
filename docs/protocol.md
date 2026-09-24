@@ -38,7 +38,7 @@ State paths use dot notation, such as `weather.temperature`. Paths are registere
 
 State has a declared owner:
 
-- Host-owned: `weather.*`, `notifications.*`, `music.*`, `calendar.*`, `assistant.*`.
+- Host-owned: `weather.*`, `notifications.*`, `music.*`, `calendar.*`, `assistant.*`, `steps`.
 - Watch-owned: `system.battery`, `system.connection`, `system.active_app`, `system.clock`, `navigation.*`, `input.*`.
 
 A peer must reject a mutation targeting state owned by the receiving side. Every successful host-owned mutation consumes exactly one globally increasing revision:

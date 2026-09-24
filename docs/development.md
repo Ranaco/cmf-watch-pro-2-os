@@ -9,3 +9,11 @@ cd /home/rana/watch
 ./scripts/run-simulator.sh
 ```
 
+Run the localhost host service in a separate terminal with:
+
+```bash
+cd /home/rana/watch
+cargo run --manifest-path host/Cargo.toml
+```
+
+The simulator remains fully usable if the host is absent. When it is present, the Zephyr transport reconnects to `127.0.0.1:4660` and exchanges protocol v1 frames. Use `./scripts/check-transport.sh` for the automated cross-language handshake check.

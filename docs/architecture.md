@@ -33,3 +33,7 @@ The initial registry contains Home, Notifications, Music, Assistant, and Setting
 - The renderer consumes watch state and never calls host services.
 - Navigation is local and never requires a connection.
 - State ownership is enforced before any mutation reaches the state store.
+
+## Simulator host path
+
+The Rust host listens on localhost TCP port 4660. The Zephyr `native_sim` build uses native offloaded sockets to connect without TAP setup, then passes bounded frames into the C protocol codec. The codec emits semantic messages only; the transport never writes `WatchState` and the renderer never observes socket state directly.

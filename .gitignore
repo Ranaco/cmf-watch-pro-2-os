@@ -1,5 +1,5 @@
 /build/
+/host/target/
 *.log
 *.pyc
 __pycache__/
-

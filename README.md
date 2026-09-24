@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Phase 6 complete: round simulator, layered runtime, five-app offline registry, and tested protocol v1 specification.
+Phase 7 complete: round simulator, layered runtime, five-app offline registry, frozen protocol v1, Rust host service, Zephyr C codec, and localhost TCP transport.
 
 ## Run
 
@@ -17,12 +17,22 @@ cd /home/rana/watch
 
 The simulator renders locally. Click the weather card or press `R` to open Notifications, then use the local Music and Back actions. No host connection is required.
 
+To exercise the host connection, start the Rust service in one terminal before launching the simulator:
+
+```bash
+cargo run --manifest-path host/Cargo.toml
+```
+
+The simulator reconnects automatically to `127.0.0.1:4660` and performs the protocol hello, capabilities, and synchronization sequence. This TCP backend is simulator-only; no BLE or physical-watch access is involved.
+
 Run all current checks with:
 
 ```bash
 ./scripts/test-core.sh
 ./scripts/check-simulator.sh
 ./scripts/test-protocol.sh
+./scripts/test-host.sh
+./scripts/check-transport.sh
 ```
 
 ## Workspaces
