@@ -1,0 +1,34 @@
+/* CMF Watch Pro 2 desktop simulator: round 466 x 466 pixel display. */
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	aliases {
+		sw0 = &sim_button;
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		sim_button: sim_button {
+			gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+			zephyr,code = <INPUT_KEY_R>;
+		};
+	};
+};
+
+&sdl_dc {
+	width = <466>;
+	height = <466>;
+};
+
+&gpio0 {
+	ngpios = <2>;
+
+	sdl_gpio {
+		status = "okay";
+		compatible = "zephyr,gpio-emul-sdl";
+		/* SDL scancode 21 is the R key. */
+		scancodes = <0 21>;
+	};
+};
