@@ -37,6 +37,12 @@ static void handle_action(enum renderer_action action)
 	case RENDERER_ACTION_OPEN_MUSIC:
 		changed = navigation_push(&navigation, WATCH_SCREEN_MUSIC);
 		break;
+	case RENDERER_ACTION_OPEN_ASSISTANT:
+		changed = navigation_push(&navigation, WATCH_SCREEN_ASSISTANT);
+		break;
+	case RENDERER_ACTION_OPEN_SETTINGS:
+		changed = navigation_push(&navigation, WATCH_SCREEN_SETTINGS);
+		break;
 	case RENDERER_ACTION_BACK:
 		changed = navigation_pop(&navigation);
 		backwards = true;

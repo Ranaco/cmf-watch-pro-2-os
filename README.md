@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Phase 4 complete: round simulator plus layered local runtime and offline navigation.
+Phase 5 complete: round simulator, layered runtime, and five-app offline registry.
 
 ## Run
 

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 4 — local watch runtime architecture (complete).
+Phase 5 — offline watch application registry (complete).
 
 ## Completed tasks
 
@@ -28,6 +28,10 @@ Phase 4 — local watch runtime architecture (complete).
 - Added offline Home, Notifications, and Music navigation with forward/back animations.
 - Added host-side unit tests for navigation and state behavior.
 - Expanded the SDL smoke test to verify three-screen pointer navigation and hardware-button input.
+- Added a compiled native application registry with stable metadata and offline availability.
+- Registered Home, Notifications, Music, Assistant, and Settings.
+- Added a circular Home app dock and verified every app opens without a host connection.
+- Extended core tests to validate registry size, lookup, screen mapping, and offline capability.
 
 ## Environment
 
@@ -55,11 +59,11 @@ None.
 
 The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Builds still succeed; this affects build speed only.
 
-None for Phase 4.
+None for Phase 5.
 
 ## Next task
 
-Phase 5 — define the lightweight application registry and make Home, Notifications, Music, Assistant, and Settings available offline.
+Phase 6 — specify the versioned host/watch protocol and add schema examples and compatibility tests before implementing transport.
 
 ## Hardware safety
 

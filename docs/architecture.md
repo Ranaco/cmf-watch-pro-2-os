@@ -18,3 +18,9 @@ The desktop simulator uses the same Zephyr and LVGL application layer intended f
 | `transport` | Connection boundary; intentionally offline until the TCP phase |
 
 `main.c` only enters the runtime. Renderer callbacks emit semantic actions, the runtime applies them to navigation/state, and the renderer receives the resulting state. No navigation path performs a host round trip.
+
+## Application model
+
+Applications are registered as compiled native descriptors. The registry owns stable IDs, names, screen identities, offline copy, and availability metadata. Runtime services own navigation, rendering, state, and input, preventing individual apps from coupling themselves to SDL or future CMF hardware drivers.
+
+The initial registry contains Home, Notifications, Music, Assistant, and Settings. All five open while the transport abstraction reports disconnected.

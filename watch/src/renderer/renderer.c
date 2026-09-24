@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <lvgl.h>
 #include "animation/watch_animation.h"
+#include "apps/app_registry.h"
 
 static renderer_action_handler_t handler;
 static const lv_color_t BG = LV_COLOR_MAKE(8, 10, 13);
@@ -62,6 +63,23 @@ static void button_create(lv_obj_t *parent, const char *text, lv_align_t align,
 	lv_obj_center(button_label);
 }
 
+static void app_button_create(lv_obj_t *parent, const char *text, int32_t x,
+			      enum renderer_action action)
+{
+	lv_obj_t *button = lv_button_create(parent);
+	lv_obj_set_size(button, 46, 40);
+	lv_obj_align(button, LV_ALIGN_BOTTOM_MID, x, -36);
+	lv_obj_set_style_radius(button, 20, 0);
+	lv_obj_set_style_bg_color(button, SURFACE, 0);
+	lv_obj_set_style_border_width(button, 1, 0);
+	lv_obj_set_style_border_color(button, lv_color_make(48, 54, 61), 0);
+	lv_obj_add_event_cb(button, action_event, LV_EVENT_CLICKED,
+			    (void *)(uintptr_t)action);
+	lv_obj_t *button_label = label(button, text, &lv_font_montserrat_14,
+					       lv_color_white());
+	lv_obj_center(button_label);
+}
+
 static void render_home(lv_obj_t *face, const struct watch_state *state)
 {
 	char battery[8];
@@ -101,19 +119,22 @@ static void render_home(lv_obj_t *face, const struct watch_state *state)
 		       MUTED);
 	lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, -11);
 	object = label(face, steps, &lv_font_montserrat_20, lv_color_white());
-	lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, -76);
-	object = label(face, "Tap card or press R", &lv_font_montserrat_14, MUTED);
-	lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, -48);
+	lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, -91);
+	app_button_create(face, "N", -81, RENDERER_ACTION_OPEN_NOTIFICATIONS);
+	app_button_create(face, "M", -27, RENDERER_ACTION_OPEN_MUSIC);
+	app_button_create(face, "AI", 27, RENDERER_ACTION_OPEN_ASSISTANT);
+	app_button_create(face, "S", 81, RENDERER_ACTION_OPEN_SETTINGS);
 }
 
 static void render_app(lv_obj_t *face, const struct watch_state *state)
 {
 	bool notifications = state->active_screen == WATCH_SCREEN_NOTIFICATIONS;
-	const char *title = notifications ? "Notifications" : "Music";
-	const char *headline = notifications ? "You're all caught up"
-					     : state->music_title;
-	const char *detail = notifications ? "Opened locally. No host required."
-					   : "Cached controls available offline.";
+	const struct watch_app_descriptor *app =
+		app_registry_find(state->active_screen);
+	const char *title = app != NULL ? app->name : "Unknown";
+	const char *headline = app != NULL ? app->headline : "Unavailable";
+	const char *detail = app != NULL ? app->offline_message
+					 : "Application metadata is missing.";
 	lv_obj_t *object = label(face, "OFFLINE READY", &lv_font_montserrat_14,
 				 ACCENT);
 	lv_obj_align(object, LV_ALIGN_TOP_LEFT, 76, 48);

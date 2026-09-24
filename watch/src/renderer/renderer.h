@@ -6,6 +6,8 @@
 enum renderer_action {
 	RENDERER_ACTION_OPEN_NOTIFICATIONS,
 	RENDERER_ACTION_OPEN_MUSIC,
+	RENDERER_ACTION_OPEN_ASSISTANT,
+	RENDERER_ACTION_OPEN_SETTINGS,
 	RENDERER_ACTION_BACK,
 };
 typedef void (*renderer_action_handler_t)(enum renderer_action action);

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "navigation/navigation.h"
 #include "state/watch_state.h"
+#include "apps/app_registry.h"
 
 int main(void)
 {
@@ -25,6 +26,13 @@ int main(void)
 	watch_state_set_screen(&state, WATCH_SCREEN_SETTINGS);
 	assert(state.active_screen == WATCH_SCREEN_SETTINGS);
 	assert(watch_screen_name(state.active_screen) != NULL);
+	assert(app_registry_count() == 5);
+	for (size_t index = 0; index < app_registry_count(); ++index) {
+		const struct watch_app_descriptor *app = app_registry_at(index);
+		assert(app != NULL);
+		assert(app->offline_available);
+		assert(app_registry_find(app->screen) == app);
+	}
 	puts("Core navigation and state tests passed.");
 	return 0;
 }
