@@ -10,6 +10,7 @@
 #include "navigation/navigation.h"
 #include "renderer/renderer.h"
 #include "state/watch_state.h"
+#include "state/watch_sync.h"
 #include "transport/transport.h"
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
@@ -18,6 +19,8 @@ LOG_MODULE_REGISTER(watch_runtime);
 
 static struct watch_state state;
 static struct watch_navigation navigation;
+static struct watch_sync sync_state;
+static bool runtime_ready;
 
 static void render_current(bool backwards)
 {
@@ -26,25 +29,52 @@ static void render_current(bool backwards)
 	renderer_render(&state, backwards);
 }
 
+static int handle_protocol_message(const struct watch_protocol_message *message, void *context)
+{
+	ARG_UNUSED(context);
+	enum watch_sync_result result = watch_sync_handle(&sync_state, &state, message);
+	if (result == WATCH_SYNC_ERROR) {
+		LOG_WRN("Rejected semantic message: %s", watch_message_type_name(message->type));
+		return -EINVAL;
+	}
+	if (result == WATCH_SYNC_NEEDS_SNAPSHOT) {
+		LOG_WRN("Revision gap after %llu; requesting snapshot",
+			(unsigned long long)watch_sync_revision(&sync_state));
+		return transport_request_sync(watch_sync_revision(&sync_state));
+	}
+	if (result == WATCH_SYNC_CHANGED) {
+		state.connection = WATCH_CONNECTION_ONLINE;
+		LOG_INF("State synchronized revision=%llu temp=%d steps=%u notifications=%u",
+			(unsigned long long)watch_sync_revision(&sync_state), state.temperature_c,
+			state.steps, state.notification_count);
+		if (runtime_ready) renderer_refresh(&state);
+	}
+	return 0;
+}
+
+static void handle_transport_event(enum transport_event event, void *context)
+{
+	ARG_UNUSED(context);
+	if (event == TRANSPORT_EVENT_CONNECTED) {
+		state.connection = WATCH_CONNECTION_CONNECTING;
+		watch_sync_connected(&sync_state);
+	} else {
+		state.connection = WATCH_CONNECTION_OFFLINE;
+		watch_sync_disconnected(&sync_state);
+	}
+	if (runtime_ready) renderer_refresh(&state);
+}
+
 static void handle_action(enum renderer_action action)
 {
 	bool changed = false;
 	bool backwards = false;
 	switch (action) {
-	case RENDERER_ACTION_OPEN_NOTIFICATIONS:
-		changed = navigation_push(&navigation, WATCH_SCREEN_NOTIFICATIONS);
+	case RENDERER_ACTION_NEXT:
+		changed = navigation_next(&navigation);
 		break;
-	case RENDERER_ACTION_OPEN_MUSIC:
-		changed = navigation_push(&navigation, WATCH_SCREEN_MUSIC);
-		break;
-	case RENDERER_ACTION_OPEN_ASSISTANT:
-		changed = navigation_push(&navigation, WATCH_SCREEN_ASSISTANT);
-		break;
-	case RENDERER_ACTION_OPEN_SETTINGS:
-		changed = navigation_push(&navigation, WATCH_SCREEN_SETTINGS);
-		break;
-	case RENDERER_ACTION_BACK:
-		changed = navigation_pop(&navigation);
+	case RENDERER_ACTION_PREVIOUS:
+		changed = navigation_previous(&navigation);
 		backwards = true;
 		break;
 	default:
@@ -63,14 +93,16 @@ int watch_runtime_run(void)
 		return -ENODEV;
 	}
 	watch_state_init(&state);
+	watch_sync_init(&sync_state);
 	navigation_init(&navigation);
 	watch_cache_init();
-	transport_init();
 	renderer_init(handle_action);
+	transport_init(handle_protocol_message, handle_transport_event, NULL);
 	if (watch_input_init() != 0) {
 		LOG_WRN("Hardware shortcut unavailable; pointer input remains active");
 	}
 	render_current(false);
+	runtime_ready = true;
 	lv_timer_handler();
 	if (display_blanking_off(display) < 0) {
 		LOG_WRN("Display blanking control is unavailable");
@@ -80,7 +112,7 @@ int watch_runtime_run(void)
 	while (true) {
 		transport_poll();
 		if (watch_input_poll() == WATCH_INPUT_HARDWARE_BUTTON) {
-			handle_action(RENDERER_ACTION_OPEN_NOTIFICATIONS);
+			handle_action(RENDERER_ACTION_NEXT);
 		}
 		lv_timer_handler();
 		k_sleep(K_MSEC(10));

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7 — C/Rust codecs and localhost TCP transport (complete).
+Phase 8 — synchronized host state and minimal swipe UI (complete).
 
 ## Completed tasks
 
@@ -44,6 +44,12 @@ Phase 7 — C/Rust codecs and localhost TCP transport (complete).
 - Added the Zephyr C protocol codec with the same 16,384-byte framing limit, UTF-8 validation, registered message types, required-field checks, and additive-field compatibility.
 - Added a simulator-only localhost TCP backend with automatic reconnect and session-scoped watch identity.
 - Verified an end-to-end Rust/Zephyr exchange of `hello`, `capabilities`, `sync_request`, and `sync_response` while preserving completely offline watch navigation.
+- Added a watch-side synchronization service with atomic snapshots, a bounded pre-snapshot mutation buffer, strict contiguous revisions, registered-path validation, and snapshot recovery on gaps.
+- Routed decoded transport messages through the synchronization service into locally rendered weather, step, notification, and music state.
+- Verified the live Rust/Zephyr path buffers a mutation sent before the snapshot, installs the snapshot atomically, replays the mutation, and advances through revision 4.
+- Reworked the round UI into a sparse terminal-style presentation using a black/green palette and bitmap typography.
+- Removed all on-screen action buttons and replaced them with a wraparound five-page carousel driven by full-face horizontal swipes; the hardware key advances as a fallback.
+- Added deterministic gesture tests for direction, minimum distance, and vertical-drag rejection, plus an offline simulator smoke test for the complete carousel.
 
 ## Environment
 
@@ -73,7 +79,7 @@ The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Bu
 
 ## Next task
 
-Phase 8 — dispatch decoded host mutations through a watch-side synchronization/state service, then render synchronized weather, notification, and music data without coupling transport or protocol code to LVGL. No BLE work.
+Phase 9 — refine the five application views and add bounded local cache behavior while preserving offline-first navigation. No BLE work.
 
 ## Hardware safety
 

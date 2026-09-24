@@ -9,15 +9,15 @@ The desktop simulator uses the same Zephyr and LVGL application layer intended f
 | Module | Responsibility |
 | --- | --- |
 | `runtime` | Boot, dependency initialization, event loop, and screen lifecycle coordination |
-| `navigation` | Bounded local screen stack with push, pop, replace, and current-screen operations |
-| `renderer` | LVGL object creation and state-to-widget rendering |
-| `input` | Normalized simulated hardware-button events; SDL pointer input remains supplied by Zephyr |
-| `state` | Central watch data and active-screen model |
+| `navigation` | Local five-page carousel plus bounded stack primitives |
+| `renderer` | Sparse round-face LVGL rendering and full-face swipe event capture |
+| `input` | Gesture classification and normalized simulated hardware-button events; SDL pointer input remains supplied by Zephyr |
+| `state` | Central watch data, active-screen model, and strict host synchronization service |
 | `animation` | Direction-aware screen transition policy |
 | `cache` | Bounded-cache metadata contract; persistent storage is deferred |
-| `transport` | Connection boundary; intentionally offline until the TCP phase |
+| `transport` | Framed connection boundary with a simulator-only localhost TCP backend |
 
-`main.c` only enters the runtime. Renderer callbacks emit semantic actions, the runtime applies them to navigation/state, and the renderer receives the resulting state. No navigation path performs a host round trip.
+`main.c` only enters the runtime. Renderer callbacks emit next/previous actions, the runtime applies them to navigation/state, and the renderer receives the resulting state. Horizontal gestures require a decisive 50-pixel movement and reject mostly vertical drags. No navigation path performs a host round trip.
 
 ## Application model
 
@@ -37,3 +37,5 @@ The initial registry contains Home, Notifications, Music, Assistant, and Setting
 ## Simulator host path
 
 The Rust host listens on localhost TCP port 4660. The Zephyr `native_sim` build uses native offloaded sockets to connect without TAP setup, then passes bounded frames into the C protocol codec. The codec emits semantic messages only; the transport never writes `WatchState` and the renderer never observes socket state directly.
+
+Decoded state messages pass through the watch synchronization service. It atomically installs snapshots, buffers up to 16 pre-snapshot mutations, replays only contiguous revisions, rejects unregistered paths, and requests a fresh snapshot when it detects a revision gap. Only the resulting `WatchState` reaches the renderer.

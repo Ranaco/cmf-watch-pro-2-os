@@ -20,12 +20,18 @@ static int64_t next_connect_at;
 static uint32_t next_message_id = 1;
 static struct watch_frame_decoder decoder;
 static char session_id[37];
+static transport_message_handler_t runtime_message_handler;
+static transport_event_handler_t runtime_event_handler;
+static void *runtime_context;
 
 static void disconnect(void)
 {
 	if (socket_fd >= 0) {
 		zsock_close(socket_fd);
 		socket_fd = -1;
+		if (runtime_event_handler != NULL) {
+			runtime_event_handler(TRANSPORT_EVENT_DISCONNECTED, runtime_context);
+		}
 	}
 	decoder.length = 0;
 	next_connect_at = k_uptime_get() + RECONNECT_INTERVAL_MS;
@@ -55,10 +61,7 @@ static int send_bootstrap(void)
 	if (length <= 0 || (size_t)length >= sizeof(frame) || send_bytes(frame, (size_t)length) < 0) {
 		return -EIO;
 	}
-	length = snprintk(frame, sizeof(frame),
-		"{\"version\":1,\"type\":\"sync_request\",\"id\":%u,"
-		"\"payload\":{\"last_revision\":0}}\n", next_message_id++);
-	return (length > 0 && (size_t)length < sizeof(frame)) ? send_bytes(frame, (size_t)length) : -EIO;
+	return transport_request_sync(0);
 }
 
 static bool is_command(enum watch_message_type type)
@@ -100,6 +103,9 @@ static void connect_if_due(void)
 	}
 	socket_fd = candidate;
 	LOG_INF("Connected to host at 127.0.0.1:%d", HOST_PORT);
+	if (runtime_event_handler != NULL) {
+		runtime_event_handler(TRANSPORT_EVENT_CONNECTED, runtime_context);
+	}
 	if (send_bootstrap() < 0) {
 		disconnect();
 	}
@@ -112,11 +118,15 @@ static int handle_message(const struct watch_protocol_message *message, void *co
 	if (is_command(message->type)) {
 		return send_unsupported_result(message->id);
 	}
-	return 0;
+	return runtime_message_handler != NULL ? runtime_message_handler(message, runtime_context) : 0;
 }
 
-void transport_init(void)
+void transport_init(transport_message_handler_t message_handler,
+		    transport_event_handler_t event_handler, void *context)
 {
+	runtime_message_handler = message_handler;
+	runtime_event_handler = event_handler;
+	runtime_context = context;
 	uint32_t random[4] = {sys_rand32_get(), sys_rand32_get(), sys_rand32_get(), sys_rand32_get()};
 	random[1] = (random[1] & 0xffff0fffU) | 0x00004000U;
 	random[2] = (random[2] & 0x3fffffffU) | 0x80000000U;
@@ -151,4 +161,17 @@ void transport_poll(void)
 bool transport_connected(void)
 {
 	return socket_fd >= 0;
+}
+
+int transport_request_sync(uint64_t last_revision)
+{
+	if (socket_fd < 0) {
+		return -ENOTCONN;
+	}
+	char frame[192];
+	int length = snprintk(frame, sizeof(frame),
+		"{\"version\":1,\"type\":\"sync_request\",\"id\":%u,"
+		"\"payload\":{\"last_revision\":%llu}}\n", next_message_id++,
+		(unsigned long long)last_revision);
+	return (length > 0 && (size_t)length < sizeof(frame)) ? send_bytes(frame, (size_t)length) : -EIO;
 }

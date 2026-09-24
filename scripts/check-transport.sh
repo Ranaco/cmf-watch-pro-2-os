@@ -29,7 +29,7 @@ HOST_PID=$!
 WATCH_PID=$!
 
 for _ in {1..100}; do
-  if grep -q 'Protocol: sync_response' "${WATCH_LOG}"; then
+  if grep -q 'State synchronized revision=4 temp=24 steps=9632 notifications=1' "${WATCH_LOG}"; then
     break
   fi
   if ! kill -0 "${HOST_PID}" 2>/dev/null || ! kill -0 "${WATCH_PID}" 2>/dev/null; then
@@ -48,5 +48,7 @@ grep -q 'Connected to host at 127.0.0.1:4660' "${WATCH_LOG}"
 grep -q 'Protocol: hello' "${WATCH_LOG}"
 grep -q 'Protocol: capabilities' "${WATCH_LOG}"
 grep -q 'Protocol: sync_response' "${WATCH_LOG}"
+grep -q 'State synchronized revision=1 temp=24 steps=9000 notifications=1' "${WATCH_LOG}"
+grep -q 'State synchronized revision=4 temp=24 steps=9632 notifications=1' "${WATCH_LOG}"
 
-echo "Transport integration passed: Rust host and Zephyr watch completed hello, capabilities, and synchronization over localhost TCP."
+echo "Transport integration passed: Rust host and Zephyr watch buffered a pre-snapshot mutation, installed the snapshot atomically, replayed it, and advanced through revision 4."

@@ -38,38 +38,16 @@ sleep 1
 grep -q 'CMF simulator ready at round 466x466' "${RUN_LOG}"
 grep -q "Init 'input-sdl-touch' device" "${RUN_LOG}"
 
-# Pointer input: open each registered app while transport remains offline.
-xdotool mousemove --window "${WINDOW_ID}" 233 257 click 1
-sleep 1
-grep -q 'Navigation: notifications' "${RUN_LOG}"
+# The R key models the hardware-button fallback and advances the same carousel
+# used by a left swipe. Gesture direction and rejection thresholds are covered
+# deterministically by test-core.sh because synthetic SDL drags are unreliable
+# under headless X servers.
+for screen in notifications music assistant settings home; do
+  xdotool key --window "${WINDOW_ID}" r
+  sleep 1
+  grep -q "Navigation: ${screen}" "${RUN_LOG}"
+done
 
-xdotool mousemove --window "${WINDOW_ID}" 149 380 click 1
-sleep 1
 [[ "$(grep -c 'Navigation: home' "${RUN_LOG}")" -ge 2 ]]
 
-xdotool mousemove --window "${WINDOW_ID}" 206 396 click 1
-sleep 1
-grep -q 'Navigation: music' "${RUN_LOG}"
-
-xdotool mousemove --window "${WINDOW_ID}" 149 380 click 1
-sleep 1
-xdotool mousemove --window "${WINDOW_ID}" 260 396 click 1
-sleep 1
-grep -q 'Navigation: assistant' "${RUN_LOG}"
-
-xdotool mousemove --window "${WINDOW_ID}" 149 380 click 1
-sleep 1
-xdotool mousemove --window "${WINDOW_ID}" 314 396 click 1
-sleep 1
-grep -q 'Navigation: settings' "${RUN_LOG}"
-
-xdotool mousemove --window "${WINDOW_ID}" 149 380 click 1
-sleep 1
-[[ "$(grep -c 'Navigation: home' "${RUN_LOG}")" -ge 5 ]]
-
-# Simulated hardware button: R opens Notifications without a host round trip.
-xdotool key --window "${WINDOW_ID}" r
-sleep 1
-[[ "$(grep -c 'Navigation: notifications' "${RUN_LOG}")" -ge 2 ]]
-
-echo "Simulator smoke check passed: all five apps open offline with local navigation and animations."
+echo "Simulator smoke check passed: the five-page offline carousel and hardware fallback work."

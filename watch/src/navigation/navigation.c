@@ -34,3 +34,20 @@ void navigation_replace(struct watch_navigation *navigation, enum watch_screen s
 {
 	navigation->stack[navigation->depth - 1] = screen;
 }
+
+bool navigation_next(struct watch_navigation *navigation)
+{
+	enum watch_screen current = navigation_current(navigation);
+	navigation->depth = 1;
+	navigation->stack[0] = (enum watch_screen)((current + 1) % WATCH_SCREEN_COUNT);
+	return true;
+}
+
+bool navigation_previous(struct watch_navigation *navigation)
+{
+	enum watch_screen current = navigation_current(navigation);
+	navigation->depth = 1;
+	navigation->stack[0] = current == WATCH_SCREEN_HOME
+		? WATCH_SCREEN_SETTINGS : (enum watch_screen)(current - 1);
+	return true;
+}

@@ -15,4 +15,6 @@ enum watch_screen navigation_current(const struct watch_navigation *navigation);
 bool navigation_push(struct watch_navigation *navigation, enum watch_screen screen);
 bool navigation_pop(struct watch_navigation *navigation);
 void navigation_replace(struct watch_navigation *navigation, enum watch_screen screen);
+bool navigation_next(struct watch_navigation *navigation);
+bool navigation_previous(struct watch_navigation *navigation);
 #endif

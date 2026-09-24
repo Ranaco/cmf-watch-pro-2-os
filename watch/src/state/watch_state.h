@@ -9,6 +9,7 @@ enum watch_screen {
 	WATCH_SCREEN_MUSIC,
 	WATCH_SCREEN_ASSISTANT,
 	WATCH_SCREEN_SETTINGS,
+	WATCH_SCREEN_COUNT,
 };
 
 enum watch_connection_state {
@@ -26,11 +27,16 @@ struct watch_state {
 	const char *time_text;
 	const char *day_text;
 	const char *date_text;
-	const char *music_title;
+	char weather_condition[32];
+	char music_title[64];
 	bool music_playing;
+	uint16_t notification_count;
+	char notification_title[48];
+	char notification_body[96];
 };
 
 void watch_state_init(struct watch_state *state);
+void watch_state_reset_host_owned(struct watch_state *state);
 void watch_state_set_screen(struct watch_state *state, enum watch_screen screen);
 const char *watch_screen_name(enum watch_screen screen);
 #endif

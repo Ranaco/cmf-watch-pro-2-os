@@ -12,7 +12,9 @@ target_sources(app PRIVATE
   src/navigation/navigation.c
   src/renderer/renderer.c
   src/input/watch_input.c
+  src/input/watch_gesture.c
   src/state/watch_state.c
+  src/state/watch_sync.c
   src/animation/watch_animation.c
   src/cache/watch_cache.c
   src/protocol/watch_protocol.c

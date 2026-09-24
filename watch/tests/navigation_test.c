@@ -4,6 +4,7 @@
 #include "navigation/navigation.h"
 #include "state/watch_state.h"
 #include "apps/app_registry.h"
+#include "input/watch_gesture.h"
 
 int main(void)
 {
@@ -22,6 +23,23 @@ int main(void)
 	assert(navigation_pop(&navigation));
 	assert(navigation_current(&navigation) == WATCH_SCREEN_HOME);
 	assert(!navigation_pop(&navigation));
+	assert(navigation_next(&navigation));
+	assert(navigation_current(&navigation) == WATCH_SCREEN_NOTIFICATIONS);
+	assert(navigation_next(&navigation));
+	assert(navigation_current(&navigation) == WATCH_SCREEN_MUSIC);
+	assert(navigation_previous(&navigation));
+	assert(navigation_current(&navigation) == WATCH_SCREEN_NOTIFICATIONS);
+	assert(navigation_previous(&navigation));
+	assert(navigation_current(&navigation) == WATCH_SCREEN_HOME);
+	assert(navigation_previous(&navigation));
+	assert(navigation_current(&navigation) == WATCH_SCREEN_SETTINGS);
+	assert(navigation_next(&navigation));
+	assert(navigation_current(&navigation) == WATCH_SCREEN_HOME);
+	assert(watch_swipe_classify(-80, 4) == WATCH_SWIPE_NEXT);
+	assert(watch_swipe_classify(80, -4) == WATCH_SWIPE_PREVIOUS);
+	assert(watch_swipe_classify(-49, 0) == WATCH_SWIPE_NONE);
+	assert(watch_swipe_classify(-80, 41) == WATCH_SWIPE_NONE);
+	assert(watch_swipe_classify(4, 90) == WATCH_SWIPE_NONE);
 
 	watch_state_set_screen(&state, WATCH_SCREEN_SETTINGS);
 	assert(state.active_screen == WATCH_SCREEN_SETTINGS);

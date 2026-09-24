@@ -9,6 +9,7 @@ mkdir -p "${BUILD_DIR}"
 gcc -std=c17 -Wall -Wextra -Werror \
   -I"${PROJECT_DIR}/watch/src" \
   "${PROJECT_DIR}/watch/src/navigation/navigation.c" \
+  "${PROJECT_DIR}/watch/src/input/watch_gesture.c" \
   "${PROJECT_DIR}/watch/src/state/watch_state.c" \
   "${PROJECT_DIR}/watch/src/apps/app_registry.c" \
   "${PROJECT_DIR}/watch/tests/navigation_test.c" \

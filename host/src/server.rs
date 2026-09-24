@@ -36,7 +36,20 @@ fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
         for message in messages {
             eprintln!("received {} id={}", message.kind, message.id);
-            if let Some(response) = response_for(&message, next_id) {
+            if message.kind == "sync_request" {
+                let updates = synchronization_updates(next_id);
+                send(&mut stream, &updates[0])?;
+                next_id += 1;
+                if let Some(response) = response_for(&message, next_id) {
+                    send(&mut stream, &response)?;
+                    next_id += 1;
+                }
+                for mut update in updates.into_iter().skip(1) {
+                    update.id = next_id;
+                    send(&mut stream, &update)?;
+                    next_id += 1;
+                }
+            } else if let Some(response) = response_for(&message, next_id) {
                 send(&mut stream, &response)?;
                 next_id += 1;
             }
@@ -102,13 +115,42 @@ fn hello(id: u32) -> Message {
 
 fn default_state() -> Value {
     json!({
-        "weather": { "temperature": 28, "condition": "clear" },
-        "notifications": [],
-        "music": { "title": "Nothing playing", "playing": false },
+        "weather": { "temperature": 26, "condition": "Cloudy" },
+        "notifications": [{
+            "id": "notif_welcome",
+            "title": "Host connected",
+            "body": "Your watch data is synchronized."
+        }],
+        "music": { "title": "Ready to play", "playing": false },
         "calendar": [],
         "assistant": { "available": false },
-        "steps": 7421
+        "steps": 9000
     })
+}
+
+fn synchronization_updates(first_id: u32) -> Vec<Message> {
+    vec![
+        Message::new(
+            "state_patch",
+            first_id,
+            json!({"path":"weather.temperature","value":24,"revision":1}),
+        ),
+        Message::new(
+            "state_patch",
+            first_id + 1,
+            json!({"path":"steps","value":9632,"revision":2}),
+        ),
+        Message::new(
+            "state_patch",
+            first_id + 2,
+            json!({"path":"music.title","value":"Localhost Radio","revision":3}),
+        ),
+        Message::new(
+            "state_patch",
+            first_id + 3,
+            json!({"path":"music.playing","value":true,"revision":4}),
+        ),
+    ]
 }
 
 fn session_id() -> String {
