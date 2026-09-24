@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Phase 3: round 466×466 desktop watch simulator.
+Phase 4 complete: round simulator plus layered local runtime and offline navigation.
 
 ## Run
 
@@ -15,7 +15,14 @@ cd /home/rana/watch
 ./scripts/run-simulator.sh
 ```
 
-The simulator renders locally. Click the weather card or press `R` to open the offline Notifications screen; click **Back home** to return.
+The simulator renders locally. Click the weather card or press `R` to open Notifications, then use the local Music and Back actions. No host connection is required.
+
+Run all current checks with:
+
+```bash
+./scripts/test-core.sh
+./scripts/check-simulator.sh
+```
 
 ## Workspaces
 

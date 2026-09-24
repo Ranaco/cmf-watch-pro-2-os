@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 3 — round 466×466 LVGL desktop simulator (complete).
+Phase 4 — local watch runtime architecture (complete).
 
 ## Completed tasks
 
@@ -22,6 +22,12 @@ Phase 3 — round 466×466 LVGL desktop simulator (complete).
 - Initialized SDL pointer input and mapped the `R` key as a simulated hardware button.
 - Added an automated smoke test covering the build, 466×466 geometry, LVGL startup, pointer navigation, Back navigation, and `R`-key input.
 - Corrected the circular safe inset after visual verification and confirmed the revised composition from a simulator screenshot.
+- Split the watch implementation into runtime, navigation, renderer, input, state, animation, cache, and transport modules.
+- Reduced `main.c` to the runtime entrypoint.
+- Added a bounded local navigation stack and central `WatchState` model.
+- Added offline Home, Notifications, and Music navigation with forward/back animations.
+- Added host-side unit tests for navigation and state behavior.
+- Expanded the SDL smoke test to verify three-screen pointer navigation and hardware-button input.
 
 ## Environment
 
@@ -49,11 +55,11 @@ None.
 
 The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Builds still succeed; this affects build speed only.
 
-None for Phase 3.
+None for Phase 4.
 
 ## Next task
 
-Phase 4 — split the prototype into runtime, renderer, navigation, input, state, cache, animation, and transport layers without changing the verified simulator behavior.
+Phase 5 — define the lightweight application registry and make Home, Notifications, Music, Assistant, and Settings available offline.
 
 ## Hardware safety
 

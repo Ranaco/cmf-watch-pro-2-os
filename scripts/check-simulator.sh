@@ -38,18 +38,26 @@ sleep 1
 grep -q 'CMF simulator ready at round 466x466' "${RUN_LOG}"
 grep -q "Init 'input-sdl-touch' device" "${RUN_LOG}"
 
-# Pointer input: open Notifications, then return Home.
+# Pointer input: Home -> Notifications -> Music -> Notifications -> Home.
 xdotool mousemove --window "${WINDOW_ID}" 233 257 click 1
 sleep 1
 grep -q 'Navigation: notifications' "${RUN_LOG}"
 
-xdotool mousemove --window "${WINDOW_ID}" 233 380 click 1
+xdotool mousemove --window "${WINDOW_ID}" 317 380 click 1
+sleep 1
+grep -q 'Navigation: music' "${RUN_LOG}"
+
+xdotool mousemove --window "${WINDOW_ID}" 149 380 click 1
+sleep 1
+[[ "$(grep -c 'Navigation: notifications' "${RUN_LOG}")" -ge 2 ]]
+
+xdotool mousemove --window "${WINDOW_ID}" 149 380 click 1
 sleep 1
 [[ "$(grep -c 'Navigation: home' "${RUN_LOG}")" -ge 2 ]]
 
 # Simulated hardware button: R opens Notifications without a host round trip.
 xdotool key --window "${WINDOW_ID}" r
 sleep 1
-[[ "$(grep -c 'Navigation: notifications' "${RUN_LOG}")" -ge 2 ]]
+[[ "$(grep -c 'Navigation: notifications' "${RUN_LOG}")" -ge 3 ]]
 
-echo "Simulator smoke check passed: build, round 466x466 display, pointer navigation, R-key input, and LVGL animations."
+echo "Simulator smoke check passed: build, round display, three-screen navigation, R-key input, and animations."
