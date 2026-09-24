@@ -1,0 +1,13 @@
+{
+  "name": "standard command error",
+  "message": {
+    "version": 1, "type": "app_open", "id": 812,
+    "payload": { "app_id": "missing-app" }
+  },
+  "expected": {
+    "response": {
+      "version": 1, "type": "command_result", "reply_to": 812,
+      "payload": { "status": "error", "code": "app_not_found" }
+    }
+  }
+}

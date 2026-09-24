@@ -1,0 +1,13 @@
+{
+  "name": "request synchronization on revision gap",
+  "initial": { "revision": 42, "state": { "music": { "playing": false } } },
+  "message": {
+    "version": 1, "type": "state_patch", "id": 102,
+    "payload": { "path": "music.playing", "value": true, "revision": 45 }
+  },
+  "expected": {
+    "disposition": "sync_required", "revision": 42,
+    "state": { "music": { "playing": false } },
+    "event": { "type": "sync_request", "payload": { "last_revision": 42 } }
+  }
+}

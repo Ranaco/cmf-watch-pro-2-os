@@ -1,0 +1,12 @@
+{
+  "name": "apply next leaf revision",
+  "initial": { "revision": 41, "state": { "weather": { "temperature": 27, "condition": "clear" } } },
+  "message": {
+    "version": 1, "type": "state_patch", "id": 100,
+    "payload": { "path": "weather.temperature", "value": 28, "revision": 42 }
+  },
+  "expected": {
+    "disposition": "applied", "revision": 42,
+    "state": { "weather": { "temperature": 28, "condition": "clear" } }
+  }
+}

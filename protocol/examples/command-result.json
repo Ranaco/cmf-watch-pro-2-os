@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "type": "command_result",
+  "id": 85,
+  "reply_to": 82,
+  "payload": { "status": "error", "code": "app_not_found" }
+}

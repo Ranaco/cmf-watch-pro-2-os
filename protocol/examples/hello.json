@@ -4,6 +4,7 @@
   "id": 1,
   "payload": {
     "device_id": "simulator-001",
+    "session_id": "9f50db12-02ea-42b7-a3ee-a6948529a7b1",
     "runtime_version": "0.1.0",
     "protocol_versions": [1],
     "simulator": true

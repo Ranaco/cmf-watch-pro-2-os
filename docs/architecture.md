@@ -24,3 +24,12 @@ The desktop simulator uses the same Zephyr and LVGL application layer intended f
 Applications are registered as compiled native descriptors. The registry owns stable IDs, names, screen identities, offline copy, and availability metadata. Runtime services own navigation, rendering, state, and input, preventing individual apps from coupling themselves to SDL or future CMF hardware drivers.
 
 The initial registry contains Home, Notifications, Music, Assistant, and Settings. All five open while the transport abstraction reports disconnected.
+
+## Layer invariants
+
+- Transport moves framed bytes and does not mutate state.
+- Protocol codecs parse and emit semantic messages and do not touch LVGL.
+- The host publishes domain state and never controls pixels or widget coordinates.
+- The renderer consumes watch state and never calls host services.
+- Navigation is local and never requires a connection.
+- State ownership is enforced before any mutation reaches the state store.

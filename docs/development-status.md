@@ -35,6 +35,10 @@ Phase 6 — versioned host/watch protocol specification (complete).
 - Defined the strict protocol v1 envelope, message taxonomy, state revision rules, reconnect sequence, limits, and error policy.
 - Added JSON Schema validation and representative connection, synchronization, state, event, and command packets.
 - Added positive, negative, required-payload, registry-consistency, and version compatibility tests.
+- Froze protocol v1 semantics: additive unknown fields are ignored, while unknown message types and protocol versions are rejected.
+- Defined host/watch state ownership, registered leaf-only patch paths, exact revision sequencing, and atomic snapshot replacement during synchronization.
+- Added session-scoped message identity, command results with stable status/error codes, bootstrap negotiation, and exact newline-delimited UTF-8 framing rules.
+- Added shared conformance fixtures for future C and Rust codecs, covering patch application, stale revisions, revision gaps, and command failures.
 
 ## Environment
 
@@ -54,7 +58,7 @@ Phase 6 — versioned host/watch protocol specification (complete).
 
 - `Ubuntu-24.04` is already installed and suitable for the planned development environment.
 - Ninja, device-tree compiler, Cargo, and Rust were initially absent; all are now installed.
-- This project directory currently contains the brief and empty `work/` and `outputs/` directories; it is not yet a Git repository.
+- The active project is `/home/rana/watch` in WSL and is a Git repository. The generated Windows projectless directory is not the active source tree.
 
 ## Blockers
 
@@ -62,11 +66,9 @@ None.
 
 The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Builds still succeed; this affects build speed only.
 
-None for Phase 6.
-
 ## Next task
 
-Phase 7 — implement transport interfaces on watch and host, with localhost TCP as the first backend and no BLE work.
+Phase 7 — implement the C/watch and Rust/host codecs against the shared fixtures, then connect them through the existing transport interfaces using localhost TCP as the first backend. No BLE work.
 
 ## Hardware safety
 

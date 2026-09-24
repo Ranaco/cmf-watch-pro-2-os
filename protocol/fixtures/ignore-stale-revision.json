@@ -1,0 +1,9 @@
+{
+  "name": "ignore duplicate revision",
+  "initial": { "revision": 42, "state": { "steps": 7421 } },
+  "message": {
+    "version": 1, "type": "state_patch", "id": 101,
+    "payload": { "path": "steps", "value": 8000, "revision": 42 }
+  },
+  "expected": { "disposition": "ignored_stale", "revision": 42, "state": { "steps": 7421 } }
+}

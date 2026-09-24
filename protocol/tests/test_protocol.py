@@ -8,7 +8,7 @@ SCHEMA = json.loads((ROOT / "schema/message.schema.json").read_text())
 VALIDATOR = Draft202012Validator(SCHEMA)
 
 REQUIRED_PAYLOAD_FIELDS = {
-    "hello": {"device_id", "runtime_version", "protocol_versions", "simulator"},
+    "hello": {"device_id", "session_id", "runtime_version", "protocol_versions", "simulator"},
     "capabilities": {"features", "apps", "display"},
     "ping": {"nonce"}, "pong": {"nonce"},
     "sync_request": {"last_revision"}, "sync_response": {"revision", "state"},
@@ -24,6 +24,7 @@ REQUIRED_PAYLOAD_FIELDS = {
     "action": {"app_id", "action_id", "arguments"},
     "button": {"button", "gesture"}, "gesture": {"gesture"},
     "input": {"input_id", "value"}, "refresh_request": {"scope"},
+    "command_result": {"status", "code"},
 }
 
 def validate_message(message: dict) -> None:
@@ -48,10 +49,14 @@ def main() -> None:
         {"version": 2, "type": "ping", "id": 1, "payload": {"nonce": 1}},
         {"version": 1, "type": "draw_pixels", "id": 1, "payload": {}},
         {"version": 1, "type": "ping", "id": -1, "payload": {"nonce": 1}},
-        {"version": 1, "type": "ping", "id": 1, "payload": {}, "extra": True},
     ]
     for message in invalid:
         assert list(VALIDATOR.iter_errors(message)), f"invalid envelope accepted: {message}"
+
+    additive = {"version": 1, "type": "ping", "id": 10,
+                "payload": {"nonce": 7, "future_field": True},
+                "trace_id": "future-compatible"}
+    validate_message(additive)
 
     incomplete = {"version": 1, "type": "state_patch", "id": 9,
                   "payload": {"path": "weather.temperature", "value": 28}}
@@ -61,7 +66,20 @@ def main() -> None:
         pass
     else:
         raise AssertionError("state_patch without revision was accepted")
-    print(f"Protocol v1 tests passed: {len(examples)} examples and negative cases.")
+
+    fixtures = []
+    for path in sorted((ROOT / "fixtures").glob("*.json")):
+        fixture = json.loads(path.read_text())
+        assert {"name", "message", "expected"} <= fixture.keys()
+        validate_message(fixture["message"])
+        response = fixture["expected"].get("response")
+        if response is not None:
+            response.setdefault("id", 0)
+            validate_message(response)
+        fixtures.append(fixture)
+
+    print(f"Protocol v1 tests passed: {len(examples)} examples, "
+          f"{len(fixtures)} conformance fixtures, and negative cases.")
 
 if __name__ == "__main__":
     main()
