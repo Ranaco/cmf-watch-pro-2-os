@@ -70,6 +70,6 @@ for screen in notifications music assistant settings home; do
   sleep 0.35
   grep -q "Navigation: ${screen}" "${WATCH_LOG}"
 done
-grep -q 'CMF simulator ready at round 466x466 (offline=1)' "${WATCH_LOG}"
+grep -q 'CMF simulator ready platform=native_sim display=466x466 round=1 offline=1' "${WATCH_LOG}"
 
 echo "Latency check passed: synchronization completed at 100, 300, and 1000 ms; the offline carousel stayed local."

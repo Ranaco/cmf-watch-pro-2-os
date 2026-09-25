@@ -17,6 +17,7 @@ The desktop simulator uses the same Zephyr and LVGL application layer intended f
 | `animation` | Direction-aware screen transition policy |
 | `cache` | Fixed-size domain records, validation/checksum policy, and replaceable persistence adapter |
 | `transport` | Framed connection boundary with a simulator-only localhost TCP backend |
+| `platform` | Evidence-gated target identity, geometry, and capability contract above Zephyr drivers |
 
 `main.c` only enters the runtime. Renderer callbacks emit next/previous actions, the runtime applies them to navigation/state, and the renderer receives the resulting state. Horizontal gestures require a decisive 50-pixel movement and reject mostly vertical drags. No navigation path performs a host round trip.
 

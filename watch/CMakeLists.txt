@@ -7,6 +7,7 @@ target_include_directories(app PRIVATE src)
 
 target_sources(app PRIVATE
   src/main.c
+  src/platform/watch_platform_native.c
   src/runtime/watch_runtime.c
   src/actions/watch_actions.c
   src/apps/app_registry.c

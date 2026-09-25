@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 14 — stable, measured simulator product milestone (complete).
+Phase 19 — read-only platform research and non-flashable board scaffold (complete).
 
 ## Completed tasks
 
@@ -66,6 +66,13 @@ Phase 14 — stable, measured simulator product milestone (complete).
 - Expanded automated coverage with manifest drift checks, an action reconciliation check, performance budgets, and a reconnect soak runner configurable to one hour.
 - Instrumented local render submission and LVGL refresh events; tuned the refresh period to 16 ms and measured 0 ms render submission with a 50 FPS minimum sampled animation rate.
 - Ran a 15-second accelerated soak with four-second host reconnects, continuous navigation/actions, and RSS reporting without crashes, protocol desynchronization, or navigation corruption.
+- Pinned the Actions/LVGL platform reference, unofficial BLE protocol research, and community stock-image dump to exact commits without vendoring or executing firmware artifacts.
+- Recorded retail-watch facts, conflicts, likely findings, and unknowns in an evidence register; the CPU core, retail wiring, memory map, storage layout, and boot/recovery behavior remain explicitly unresolved.
+- Installed the historical official Zephyr 0.13.2 standalone ARM toolchain alongside the current SDK without changing the default Zephyr environment.
+- Bypassed the vendor wrapper's post-build packing path and directly compiled all 802 Zephyr targets for the Actions `ats3089c_dev_watch` reference board.
+- Produced a compile-only reference ELF using Zephyr 2.7.0: 1,222,568 bytes flash, 311 KiB SRAM, and 5,796,192 bytes PSRAM; no packer, flash runner, DFU, or device operation ran.
+- Added a native platform capability contract and unit test, with unsupported BLE, battery, sensor, and crown capabilities deliberately absent.
+- Added a CMF Watch Pro 2 board scaffold with non-discoverable `.template` files and no fabricated pins, addresses, partitions, clocks, or memory values.
 
 ## Environment
 
@@ -79,6 +86,7 @@ Phase 14 — stable, measured simulator product milestone (complete).
 | Python | 3.12.3 |
 | CMake | 3.28.3 |
 | GCC | 13.3.0 |
+| Vendor-reference ARM toolchain | Zephyr SDK 0.13.2 standalone, installed at `/home/rana/zephyr-toolchain-arm-0.13.2` |
 | Network | DNS lookup for `github.com` succeeded |
 
 ## Discoveries
@@ -89,13 +97,13 @@ Phase 14 — stable, measured simulator product milestone (complete).
 
 ## Blockers
 
-None.
+The simulator has no functional blocker. Physical hardware work remains intentionally blocked by missing retail-board evidence and the absence of a proven stock readback/restore and recovery path.
 
-The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Builds still succeed; this affects build speed only.
+The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Builds still succeed; this affects build speed only. The historical toolchain's optional GDB needs `libpython3.8.so.1.0` on Ubuntu 24.04, but compilation does not use GDB.
 
 ## Next task
 
-Phase 15 — begin read-only CMF Watch Pro 2 platform research with confidence labels and source provenance. No physical watch access, BLE operations, or firmware writes.
+Phase 20 is the BLE/device boundary. Do not begin it until the user explicitly chooses to proceed and the operation is separately scoped. The safest useful next work is simulator-side feature expansion or further read-only analysis of board evidence and recovery requirements.
 
 ## Hardware safety
 

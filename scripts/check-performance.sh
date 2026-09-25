@@ -23,7 +23,7 @@ for _ in {1..10}; do
   sleep 0.4
 done
 
-grep -q 'CMF simulator ready at round 466x466 (offline=1)' "${RUN_LOG}"
+grep -q 'CMF simulator ready platform=native_sim display=466x466 round=1 offline=1' "${RUN_LOG}"
 render_max="$(sed -n 's/.*PERF navigation_render_ms=\([0-9][0-9]*\).*/\1/p' "${RUN_LOG}" | sort -nr | head -n 1)"
 fps_min="$(sed -n 's/.*PERF animation_frames=[0-9][0-9]* window_ms=300 fps=\([0-9][0-9]*\).*/\1/p' "${RUN_LOG}" | sort -n | head -n 1)"
 if [[ -z "${render_max}" || -z "${fps_min}" ]]; then

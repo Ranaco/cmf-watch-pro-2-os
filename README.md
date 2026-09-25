@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Simulator product milestone complete through Phase 14: offline-first round UI, frozen protocol v1, Rust host, atomic synchronization, bounded cache, optimistic actions, compiled app manifests, reconnect soak coverage, and measured performance budgets.
+Simulator product milestone complete through Phase 14, followed by the read-only platform milestone through Phase 19: offline-first round UI, frozen protocol v1, Rust host, atomic synchronization, bounded cache, optimistic actions, compiled app manifests, reconnect soak coverage, measured performance budgets, a compile-proven Actions reference, a platform capability contract, and an evidence-gated CMF board scaffold.
 
 ## Run
 
@@ -39,6 +39,7 @@ Run all current checks with:
 
 ```bash
 ./scripts/test-core.sh
+./scripts/test-platform.sh
 ./scripts/check-simulator.sh
 ./scripts/test-protocol.sh
 ./scripts/test-host.sh

@@ -25,3 +25,5 @@ The normal simulator runner enables persistence at `build/simulator/watch-cache.
 `R` simulates next-page hardware input and `P` simulates activate. `./scripts/check-actions.sh` verifies immediate Music state changes, host confirmation, authoritative patching, and rollback when the host runs with `CMF_HOST_REJECT_ACTIONS=1`.
 
 App manifests are compiled, not interpreted. After editing `apps/manifests/*.json`, run `./scripts/generate-app-registry.py`, then `./scripts/test-app-manifests.sh` to verify the committed native registry is current.
+
+Run `./scripts/test-platform.sh` to verify the native target's platform contract. The read-only Actions reference compile procedure and its historical toolchain requirement are documented in `docs/actions-platform.md`; its check intentionally compiles an ELF without packing or flashing firmware.

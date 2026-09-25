@@ -10,6 +10,7 @@
 #include "cache/watch_cache_storage.h"
 #include "input/watch_input.h"
 #include "navigation/navigation.h"
+#include "platform/watch_platform.h"
 #include "renderer/renderer.h"
 #include "state/watch_state.h"
 #include "state/watch_sync.h"
@@ -157,6 +158,11 @@ static void handle_action(enum renderer_action action)
 
 int watch_runtime_run(void)
 {
+	if (watch_platform_init() != 0) {
+		LOG_ERR("Platform initialization failed");
+		return -ENODEV;
+	}
+	const struct watch_platform_info *platform = watch_platform_get_info();
 	const struct device *display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 	if (!device_is_ready(display)) {
 		LOG_ERR("Display device is not ready");
@@ -189,8 +195,9 @@ int watch_runtime_run(void)
 	if (display_blanking_off(display) < 0) {
 		LOG_WRN("Display blanking control is unavailable");
 	}
-	LOG_INF("CMF simulator ready at round 466x466 (offline=%d)",
-		!transport_connected());
+	LOG_INF("CMF simulator ready platform=%s display=%ux%u round=%d offline=%d",
+		platform->name, platform->display_width, platform->display_height,
+		platform->round_display, !transport_connected());
 	while (true) {
 		transport_poll();
 		enum watch_input_event input = watch_input_poll();

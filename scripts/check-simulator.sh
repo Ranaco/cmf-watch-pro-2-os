@@ -35,7 +35,7 @@ APP_PID=$!
 WINDOW_ID="$(timeout 5 xdotool search --sync --onlyvisible --name '^Zephyr Display$' | tail -n 1)"
 sleep 1
 
-grep -q 'CMF simulator ready at round 466x466' "${RUN_LOG}"
+grep -q 'CMF simulator ready platform=native_sim display=466x466 round=1' "${RUN_LOG}"
 grep -q "Init 'input-sdl-touch' device" "${RUN_LOG}"
 
 # The R key models the hardware-button fallback and advances the same carousel

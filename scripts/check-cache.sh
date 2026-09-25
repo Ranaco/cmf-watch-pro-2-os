@@ -60,6 +60,6 @@ for _ in {1..50}; do
   sleep 0.1
 done
 grep -q 'Restored cache revision=4 temp=24 steps=9632 notifications=3 stale=1' "${OFFLINE_LOG}"
-grep -q 'CMF simulator ready at round 466x466 (offline=1)' "${OFFLINE_LOG}"
+grep -q 'CMF simulator ready platform=native_sim display=466x466 round=1 offline=1' "${OFFLINE_LOG}"
 
 echo "Cache check passed: a bounded record restored synchronized state as stale while offline."

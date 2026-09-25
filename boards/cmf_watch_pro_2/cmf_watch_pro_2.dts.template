@@ -1,0 +1,17 @@
+/dts-v1/;
+
+/*
+ * Intentionally incomplete. Do not replace UNKNOWN values from the ATS3089C
+ * evaluation board without independent evidence from the retail watch.
+ */
+/ {
+	model = "CMF Watch Pro 2 (research skeleton)";
+	compatible = "cmf,watch-pro-2";
+
+	chosen {
+		/* zephyr,console = UNKNOWN; */
+		/* zephyr,sram = UNKNOWN; */
+		/* zephyr,flash = UNKNOWN; */
+		/* zephyr,display = UNKNOWN; */
+	};
+};
