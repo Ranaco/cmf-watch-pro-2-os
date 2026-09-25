@@ -1,0 +1,10 @@
+{
+  "id": "home",
+  "name": "Home",
+  "version": 1,
+  "entry": "overview",
+  "screen": "HOME",
+  "headline": "Your day at a glance",
+  "offline_message": "Clock and cached cards remain local.",
+  "offline_available": true
+}

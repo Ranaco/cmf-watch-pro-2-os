@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 10 — bounded local cache (complete).
+Phase 14 — stable, measured simulator product milestone (complete).
 
 ## Completed tasks
 
@@ -59,6 +59,13 @@ Phase 10 — bounded local cache (complete).
 - Restored cached data as explicitly stale while offline, then cleared the stale presentation after a successful host sync.
 - Added vertical notification browsing with a compact item position while preserving horizontal page navigation and the no-button UI.
 - Added cache validity, corruption detection, metadata, restoration, size-bound, and offline relaunch checks.
+- Added tap/activate-driven optimistic Music play/pause without introducing visible action buttons.
+- Added correlated command results, authoritative host patches, rejection/disconnect/send-failure rollback, and five-second timeout recovery.
+- Added live success and forced-rejection action integration checks using the simulator's `P` activate shortcut.
+- Replaced the handwritten app table with five validated JSON manifests compiled into a generated native C registry, without a scripting interpreter.
+- Expanded automated coverage with manifest drift checks, an action reconciliation check, performance budgets, and a reconnect soak runner configurable to one hour.
+- Instrumented local render submission and LVGL refresh events; tuned the refresh period to 16 ms and measured 0 ms render submission with a 50 FPS minimum sampled animation rate.
+- Ran a 15-second accelerated soak with four-second host reconnects, continuous navigation/actions, and RSS reporting without crashes, protocol desynchronization, or navigation corruption.
 
 ## Environment
 
@@ -88,7 +95,7 @@ The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Bu
 
 ## Next task
 
-Phase 11 — implement optimistic local actions and command-result reconciliation, beginning with music play/pause while preserving the no-button interaction model. No BLE work.
+Phase 15 — begin read-only CMF Watch Pro 2 platform research with confidence labels and source provenance. No physical watch access, BLE operations, or firmware writes.
 
 ## Hardware safety
 

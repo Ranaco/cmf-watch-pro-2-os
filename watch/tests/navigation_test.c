@@ -7,6 +7,7 @@
 #include "apps/app_registry.h"
 #include "input/watch_gesture.h"
 #include "cache/watch_cache.h"
+#include "actions/watch_actions.h"
 
 int main(void)
 {
@@ -96,6 +97,35 @@ int main(void)
 	assert(state.active_screen == WATCH_SCREEN_SETTINGS);
 	assert(!state.host_data_stale);
 
+	struct watch_actions actions;
+	watch_actions_init(&actions);
+	state.music_playing = false;
+	assert(watch_actions_begin_music(&actions, &state, 100U));
+	assert(state.music_playing && state.music_action_pending);
+	watch_actions_bind_message(&actions, 77U);
+	const char ok_payload[] = "{\"status\":\"ok\",\"code\":\"none\"}";
+	struct watch_protocol_message result = {
+		.type = WATCH_MESSAGE_COMMAND_RESULT,
+		.reply_to = 77U,
+		.has_reply_to = true,
+		.payload = ok_payload,
+		.payload_len = sizeof(ok_payload) - 1U,
+	};
+	assert(watch_actions_handle_result(&actions, &state, &result));
+	assert(state.music_playing && !state.music_action_pending);
+	assert(watch_actions_begin_music(&actions, &state, 200U));
+	watch_actions_bind_message(&actions, 78U);
+	const char error_payload[] = "{\"status\":\"rejected\",\"code\":\"busy\"}";
+	result.reply_to = 78U;
+	result.payload = error_payload;
+	result.payload_len = sizeof(error_payload) - 1U;
+	assert(watch_actions_handle_result(&actions, &state, &result));
+	assert(state.music_playing && !state.music_action_pending);
+	assert(watch_actions_begin_music(&actions, &state, 1000U));
+	assert(watch_actions_poll_timeout(&actions, &state,
+					 1000U + WATCH_ACTION_TIMEOUT_MS));
+	assert(state.music_playing && !state.music_action_pending);
+
 	watch_state_set_screen(&state, WATCH_SCREEN_SETTINGS);
 	assert(state.active_screen == WATCH_SCREEN_SETTINGS);
 	assert(watch_screen_name(state.active_screen) != NULL);
@@ -103,6 +133,8 @@ int main(void)
 	for (size_t index = 0; index < app_registry_count(); ++index) {
 		const struct watch_app_descriptor *app = app_registry_at(index);
 		assert(app != NULL);
+		assert(app->version >= 1U);
+		assert(app->entry != NULL && app->entry[0] != '\0');
 		assert(app->offline_available);
 		assert(app_registry_find(app->screen) == app);
 	}

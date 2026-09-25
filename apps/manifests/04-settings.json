@@ -1,0 +1,10 @@
+{
+  "id": "settings",
+  "name": "Settings",
+  "version": 1,
+  "entry": "device",
+  "screen": "SETTINGS",
+  "headline": "Local settings",
+  "offline_message": "Display and device controls stay local.",
+  "offline_available": true
+}

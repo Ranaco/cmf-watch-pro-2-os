@@ -2,11 +2,14 @@
 #define CMF_APP_REGISTRY_H
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include "state/watch_state.h"
 
 struct watch_app_descriptor {
 	const char *id;
 	const char *name;
+	uint16_t version;
+	const char *entry;
 	enum watch_screen screen;
 	const char *headline;
 	const char *offline_message;

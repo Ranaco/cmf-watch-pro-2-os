@@ -5,6 +5,7 @@
 / {
 	aliases {
 		sw0 = &sim_button;
+		sw1 = &sim_activate;
 	};
 
 	keys {
@@ -13,6 +14,11 @@
 		sim_button: sim_button {
 			gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
 			zephyr,code = <INPUT_KEY_R>;
+		};
+
+		sim_activate: sim_activate {
+			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+			zephyr,code = <INPUT_KEY_P>;
 		};
 	};
 };
@@ -23,12 +29,12 @@
 };
 
 &gpio0 {
-	ngpios = <2>;
+	ngpios = <3>;
 
 	sdl_gpio {
 		status = "okay";
 		compatible = "zephyr,gpio-emul-sdl";
-		/* SDL scancode 21 is the R key. */
-		scancodes = <0 21>;
+		/* SDL scancode 19 is P; 21 is R. */
+		scancodes = <0 21 19>;
 	};
 };

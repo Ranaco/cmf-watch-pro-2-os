@@ -1,0 +1,10 @@
+{
+  "id": "notifications",
+  "name": "Notifications",
+  "version": 1,
+  "entry": "inbox",
+  "screen": "NOTIFICATIONS",
+  "headline": "You're all caught up",
+  "offline_message": "Cached notifications remain available.",
+  "offline_available": true
+}

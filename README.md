@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Phase 10 complete: round simulator, layered runtime, five-page offline carousel, frozen protocol v1, Rust host service, atomic host-state synchronization, latency resilience, and bounded persistent simulator caching.
+Simulator product milestone complete through Phase 14: offline-first round UI, frozen protocol v1, Rust host, atomic synchronization, bounded cache, optimistic actions, compiled app manifests, reconnect soak coverage, and measured performance budgets.
 
 ## Run
 
@@ -15,7 +15,7 @@ cd /home/rana/watch
 ./scripts/run-simulator.sh
 ```
 
-The simulator renders locally. Swipe left or right anywhere on the round face to move through Home, Notifications, Music, Assistant, and Settings. Swipe vertically on Notifications to browse up to four cached entries. The simulated hardware button (`R`) advances to the next page as a non-touch fallback. There are no on-screen navigation buttons, and no host connection is required.
+The simulator renders locally. Swipe left or right anywhere on the round face to move through Home, Notifications, Music, Assistant, and Settings. Swipe vertically on Notifications to browse up to four cached entries. Tap the Music page to play/pause optimistically. The simulated `R` key advances to the next page and `P` activates the current page as hardware-input fallbacks. There are no on-screen navigation buttons, and ordinary navigation requires no host.
 
 To exercise the host connection, start the Rust service in one terminal before launching the simulator:
 
@@ -45,7 +45,13 @@ Run all current checks with:
 ./scripts/check-transport.sh
 ./scripts/check-latency.sh
 ./scripts/check-cache.sh
+./scripts/test-app-manifests.sh
+./scripts/check-actions.sh
+./scripts/check-performance.sh
+SOAK_SECONDS=20 ./scripts/soak-test.sh
 ```
+
+Use `SOAK_SECONDS=3600 ./scripts/soak-test.sh` for the one-hour acceptance soak.
 
 ## Workspaces
 

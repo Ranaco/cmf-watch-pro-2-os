@@ -84,6 +84,8 @@ List indices are zero-based. Invalid paths, indices, or revisions are handled at
 
 `command_result` is the standardized response to commands. Its envelope `reply_to` identifies the command. Payload `status` is `ok`, `rejected`, or `error`; `code` is machine-readable. Initial codes are `unsupported`, `invalid_argument`, `app_not_found`, `busy`, `not_available`, and `permission_denied`. Additive diagnostic fields may be ignored.
 
+The first optimistic action is `app_id=music`, `action_id=set_playing`, with boolean `arguments.playing`. The watch updates locally, correlates `command_result.reply_to`, rolls back on failure/timeout, and accepts the subsequent host-owned `music.playing` patch as authoritative.
+
 ## Watch events
 
 | Type | Required payload | Meaning |

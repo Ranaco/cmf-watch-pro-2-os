@@ -8,6 +8,7 @@ target_include_directories(app PRIVATE src)
 target_sources(app PRIVATE
   src/main.c
   src/runtime/watch_runtime.c
+  src/actions/watch_actions.c
   src/apps/app_registry.c
   src/navigation/navigation.c
   src/renderer/renderer.c

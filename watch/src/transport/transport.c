@@ -175,3 +175,18 @@ int transport_request_sync(uint64_t last_revision)
 		(unsigned long long)last_revision);
 	return (length > 0 && (size_t)length < sizeof(frame)) ? send_bytes(frame, (size_t)length) : -EIO;
 }
+
+int transport_send_music_action(bool playing, uint32_t *message_id)
+{
+	if (socket_fd < 0 || message_id == NULL) return -ENOTCONN;
+	char frame[256];
+	uint32_t id = next_message_id++;
+	int length = snprintk(frame, sizeof(frame),
+		"{\"version\":1,\"type\":\"action\",\"id\":%u,"
+		"\"payload\":{\"app_id\":\"music\",\"action_id\":\"set_playing\","
+		"\"arguments\":{\"playing\":%s}}}\n", id, playing ? "true" : "false");
+	if (length <= 0 || (size_t)length >= sizeof(frame)) return -EIO;
+	int result = send_bytes(frame, (size_t)length);
+	if (result == 0) *message_id = id;
+	return result;
+}

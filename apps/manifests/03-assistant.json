@@ -1,0 +1,10 @@
+{
+  "id": "assistant",
+  "name": "Assistant",
+  "version": 1,
+  "entry": "prompt",
+  "screen": "ASSISTANT",
+  "headline": "Assistant ready",
+  "offline_message": "Connect the host for AI requests.",
+  "offline_available": true
+}

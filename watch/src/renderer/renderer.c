@@ -16,6 +16,13 @@ static const lv_color_t LINE = LV_COLOR_MAKE(34, 67, 55);
 static lv_point_t swipe_start;
 static lv_point_t swipe_last;
 static bool swipe_tracking;
+static uint32_t rendered_frames;
+
+static void frame_event(lv_event_t *event)
+{
+	ARG_UNUSED(event);
+	rendered_frames++;
+}
 
 static lv_obj_t *label(lv_obj_t *parent, const char *text,
 		       const lv_font_t *font, lv_color_t color)
@@ -72,6 +79,12 @@ static void gesture_event(lv_event_t *event)
 	}
 }
 
+static void activate_event(lv_event_t *event)
+{
+	ARG_UNUSED(event);
+	if (handler != NULL) handler(RENDERER_ACTION_ACTIVATE);
+}
+
 static void gesture_layer_create(lv_obj_t *face)
 {
 	lv_obj_t *layer = lv_obj_create(face);
@@ -84,6 +97,7 @@ static void gesture_layer_create(lv_obj_t *face)
 	lv_obj_add_event_cb(layer, gesture_event, LV_EVENT_PRESSING, NULL);
 	lv_obj_add_event_cb(layer, gesture_event, LV_EVENT_RELEASED, NULL);
 	lv_obj_add_event_cb(layer, gesture_event, LV_EVENT_PRESS_LOST, NULL);
+	lv_obj_add_event_cb(layer, activate_event, LV_EVENT_SHORT_CLICKED, NULL);
 }
 
 static void page_indicator(lv_obj_t *face, enum watch_screen screen)
@@ -150,8 +164,10 @@ static void render_app(lv_obj_t *face, const struct watch_state *state)
 		: (music ? state->music_title : (app != NULL ? app->headline : "Unavailable"));
 	const char *detail = notifications && notification != NULL
 		? notification->body
-		: (music ? (state->music_playing ? "Playing from your connected host"
-						 : "Playback is paused")
+		: (music ? (state->music_action_feedback[0] != '\0'
+			? state->music_action_feedback
+			: (state->music_playing ? "PLAYING / TAP TO PAUSE"
+						 : "PAUSED / TAP TO PLAY"))
 			 : (app != NULL ? app->offline_message : "Application metadata is missing."));
 	const char *status = state->connection == WATCH_CONNECTION_ONLINE ? "HOST SYNCED"
 		: (state->host_data_stale ? "CACHE / STALE" : "OFFLINE READY");
@@ -192,6 +208,15 @@ static void render_app(lv_obj_t *face, const struct watch_state *state)
 void renderer_init(renderer_action_handler_t action_handler)
 {
 	handler = action_handler;
+	lv_display_t *display = lv_display_get_default();
+	if (display != NULL) {
+		lv_display_add_event_cb(display, frame_event, LV_EVENT_REFR_READY, NULL);
+	}
+}
+
+uint32_t renderer_frame_count(void)
+{
+	return rendered_frames;
 }
 
 void renderer_render(const struct watch_state *state, bool backwards)

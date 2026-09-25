@@ -44,6 +44,8 @@ struct watch_state {
 	char weather_condition[32];
 	char music_title[64];
 	bool music_playing;
+	bool music_action_pending;
+	char music_action_feedback[32];
 	struct watch_notification_list notifications;
 	bool host_data_stale;
 	uint64_t host_data_updated_at_ms;

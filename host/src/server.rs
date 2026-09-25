@@ -11,15 +11,16 @@ const MAX_SIMULATED_LATENCY_MS: u64 = 10_000;
 
 pub fn run(address: &str) -> io::Result<()> {
     let latency = configured_latency()?;
-    run_with_latency(address, latency)
+    let reject_actions = std::env::var("CMF_HOST_REJECT_ACTIONS").is_ok_and(|value| value == "1");
+    run_with_latency(address, latency, reject_actions)
 }
 
-fn run_with_latency(address: &str, latency: Duration) -> io::Result<()> {
+fn run_with_latency(address: &str, latency: Duration, reject_actions: bool) -> io::Result<()> {
     let listener = TcpListener::bind(address)?;
     eprintln!("CMF watch host listening on {address}");
     eprintln!("host latency simulation: {} ms", latency.as_millis());
     for connection in listener.incoming() {
-        match connection.and_then(|stream| handle_connection(stream, latency)) {
+        match connection.and_then(|stream| handle_connection(stream, latency, reject_actions)) {
             Ok(()) => eprintln!("watch disconnected"),
             Err(error) => eprintln!("connection error: {error}"),
         }
@@ -27,13 +28,19 @@ fn run_with_latency(address: &str, latency: Duration) -> io::Result<()> {
     Ok(())
 }
 
-fn handle_connection(mut stream: TcpStream, latency: Duration) -> io::Result<()> {
+fn handle_connection(
+    mut stream: TcpStream,
+    latency: Duration,
+    reject_actions: bool,
+) -> io::Result<()> {
+    stream.set_nodelay(true)?;
     eprintln!("watch connected from {}", stream.peer_addr()?);
     let mut next_id = 1;
     send_delayed(&mut stream, &hello(next_id), latency)?;
     next_id += 1;
     let mut decoder = FrameDecoder::default();
     let mut bytes = [0_u8; 2048];
+    let mut current_revision = 0_u64;
     loop {
         let count = stream.read(&mut bytes)?;
         if count == 0 {
@@ -57,11 +64,61 @@ fn handle_connection(mut stream: TcpStream, latency: Duration) -> io::Result<()>
                     send_delayed(&mut stream, &update, latency)?;
                     next_id += 1;
                 }
+                current_revision = 4;
+            } else if message.kind == "action" {
+                let (response, desired_playing) =
+                    music_action_response(&message, next_id, reject_actions);
+                send_delayed(&mut stream, &response, latency)?;
+                next_id += 1;
+                if let Some(playing) = desired_playing {
+                    current_revision += 1;
+                    let patch = Message::new(
+                        "state_patch",
+                        next_id,
+                        json!({
+                            "path": "music.playing",
+                            "value": playing,
+                            "revision": current_revision
+                        }),
+                    );
+                    send_delayed(&mut stream, &patch, latency)?;
+                    next_id += 1;
+                }
             } else if let Some(response) = response_for(&message, next_id) {
                 send_delayed(&mut stream, &response, latency)?;
                 next_id += 1;
             }
         }
+    }
+}
+
+fn music_action_response(
+    message: &Message,
+    id: u32,
+    reject_actions: bool,
+) -> (Message, Option<bool>) {
+    if reject_actions {
+        return (command_result(message, id, "rejected", "busy"), None);
+    }
+    let app_id = message.payload.get("app_id").and_then(Value::as_str);
+    let action_id = message.payload.get("action_id").and_then(Value::as_str);
+    let playing = message
+        .payload
+        .get("arguments")
+        .and_then(|arguments| arguments.get("playing"))
+        .and_then(Value::as_bool);
+    match (app_id, action_id, playing) {
+        (Some("music"), Some("set_playing"), Some(value)) => {
+            (command_result(message, id, "ok", "none"), Some(value))
+        }
+        (Some("music"), _, _) => (
+            command_result(message, id, "rejected", "invalid_argument"),
+            None,
+        ),
+        _ => (
+            command_result(message, id, "rejected", "app_not_found"),
+            None,
+        ),
     }
 }
 
@@ -263,5 +320,25 @@ mod tests {
         assert_eq!(parse_latency("1000").unwrap(), Duration::from_millis(1000));
         assert!(parse_latency("slow").is_err());
         assert!(parse_latency("10001").is_err());
+    }
+
+    #[test]
+    fn music_actions_return_correlated_results() {
+        let action = Message::new(
+            "action",
+            91,
+            json!({
+                "app_id": "music",
+                "action_id": "set_playing",
+                "arguments": { "playing": false }
+            }),
+        );
+        let (accepted, desired) = music_action_response(&action, 92, false);
+        assert_eq!(accepted.reply_to, Some(91));
+        assert_eq!(accepted.payload["status"], "ok");
+        assert_eq!(desired, Some(false));
+        let (rejected, desired) = music_action_response(&action, 93, true);
+        assert_eq!(rejected.payload["status"], "rejected");
+        assert_eq!(desired, None);
     }
 }

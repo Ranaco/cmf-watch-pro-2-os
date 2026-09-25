@@ -10,6 +10,7 @@ gcc -std=c17 -Wall -Wextra -Werror \
   -I"${PROJECT_DIR}/watch/src" \
   "${PROJECT_DIR}/watch/src/navigation/navigation.c" \
   "${PROJECT_DIR}/watch/src/input/watch_gesture.c" \
+	"${PROJECT_DIR}/watch/src/actions/watch_actions.c" \
   "${PROJECT_DIR}/watch/src/cache/watch_cache.c" \
   "${PROJECT_DIR}/watch/src/state/watch_state.c" \
   "${PROJECT_DIR}/watch/src/apps/app_registry.c" \

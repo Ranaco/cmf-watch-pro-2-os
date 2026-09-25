@@ -2,16 +2,7 @@
 #include "apps/app_registry.h"
 
 static const struct watch_app_descriptor apps[] = {
-	{ "home", "Home", WATCH_SCREEN_HOME, "Your day at a glance",
-	  "Clock and cached cards remain local.", true },
-	{ "notifications", "Notifications", WATCH_SCREEN_NOTIFICATIONS,
-	  "You're all caught up", "Cached notifications remain available.", true },
-	{ "music", "Music", WATCH_SCREEN_MUSIC, "Nothing playing",
-	  "Cached controls remain available offline.", true },
-	{ "assistant", "Assistant", WATCH_SCREEN_ASSISTANT, "Assistant ready",
-	  "Connect the host for AI requests.", true },
-	{ "settings", "Settings", WATCH_SCREEN_SETTINGS, "Local settings",
-	  "Display and device controls stay local.", true },
+#include "apps/app_registry.generated.inc"
 };
 
 size_t app_registry_count(void)

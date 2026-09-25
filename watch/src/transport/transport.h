@@ -18,4 +18,5 @@ void transport_init(transport_message_handler_t message_handler,
 void transport_poll(void);
 bool transport_connected(void);
 int transport_request_sync(uint64_t last_revision);
+int transport_send_music_action(bool playing, uint32_t *message_id);
 #endif

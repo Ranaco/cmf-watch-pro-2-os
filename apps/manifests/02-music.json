@@ -1,0 +1,10 @@
+{
+  "id": "music",
+  "name": "Music",
+  "version": 1,
+  "entry": "now_playing",
+  "screen": "MUSIC",
+  "headline": "Nothing playing",
+  "offline_message": "Cached metadata remains available offline.",
+  "offline_available": true
+}

@@ -27,6 +27,8 @@ void watch_state_reset_host_owned(struct watch_state *state)
 	strcpy(state->weather_condition, "Unavailable");
 	strcpy(state->music_title, "Nothing playing");
 	state->music_playing = false;
+	state->music_action_pending = false;
+	state->music_action_feedback[0] = '\0';
 	memset(&state->notifications, 0, sizeof(state->notifications));
 	state->host_data_stale = false;
 	state->host_data_updated_at_ms = 0U;

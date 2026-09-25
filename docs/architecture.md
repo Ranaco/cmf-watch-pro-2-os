@@ -9,6 +9,7 @@ The desktop simulator uses the same Zephyr and LVGL application layer intended f
 | Module | Responsibility |
 | --- | --- |
 | `runtime` | Boot, dependency initialization, event loop, and screen lifecycle coordination |
+| `actions` | Optimistic mutation, command correlation, rollback, and timeout policy |
 | `navigation` | Local five-page carousel plus bounded stack primitives |
 | `renderer` | Sparse round-face LVGL rendering and full-face swipe event capture |
 | `input` | Gesture classification and normalized simulated hardware-button events; SDL pointer input remains supplied by Zephyr |
@@ -47,3 +48,11 @@ The cache is a fixed-size record with a magic value, schema version, record size
 The simulator storage adapter uses an atomic temporary-file rename only when `CMF_WATCH_CACHE_PATH` is set. The application runner supplies a path under `build/simulator`; automated tests use isolated temporary paths. A future hardware backend can replace this adapter without changing the cache model, state service, or renderer.
 
 Restoration always forces connection state offline and host-owned data stale. A successful synchronization refreshes the cache and clears the stale presentation. Horizontal gestures navigate pages; decisive vertical gestures browse the bounded notification list.
+
+## Application manifests
+
+Application definitions live as small JSON manifests under `apps/manifests`. The generator validates stable IDs, versions, entry names, unique screen bindings, and offline metadata, then emits a native C initializer consumed by the compiled registry. There is no runtime scripting engine or downloaded executable code.
+
+## Optimistic actions
+
+Activating Music toggles the local state before any host round trip, sends a correlated semantic `action`, and shows a compact pending state. An `ok` command result confirms it; rejection, disconnect, send failure, or a five-second timeout restores the previous value. The host follows accepted results with an authoritative contiguous state patch.
