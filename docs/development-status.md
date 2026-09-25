@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 8 — synchronized host state and minimal swipe UI (complete).
+Phase 9 — first end-to-end host/watch simulator demo (complete).
 
 ## Completed tasks
 
@@ -50,6 +50,9 @@ Phase 8 — synchronized host state and minimal swipe UI (complete).
 - Reworked the round UI into a sparse terminal-style presentation using a black/green palette and bitmap typography.
 - Removed all on-screen action buttons and replaced them with a wraparound five-page carousel driven by full-face horizontal swipes; the hardware key advances as a fallback.
 - Added deterministic gesture tests for direction, minimum distance, and vertical-drag rejection, plus an offline simulator smoke test for the complete carousel.
+- Added bounded host latency injection through `CMF_HOST_LATENCY_MS`, with explicit validation for malformed and excessive values.
+- Verified automatic synchronization at 100 ms, 300 ms, and 1,000 ms of simulated host latency.
+- Verified the complete five-page carousel remains locally navigable with no host process running.
 
 ## Environment
 
@@ -79,7 +82,7 @@ The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Bu
 
 ## Next task
 
-Phase 9 — refine the five application views and add bounded local cache behavior while preserving offline-first navigation. No BLE work.
+Phase 10 — implement bounded watch-side caching for notifications, weather, music metadata, application state, and connection metadata, including timestamps, versions, and stale-state presentation. No BLE work.
 
 ## Hardware safety
 

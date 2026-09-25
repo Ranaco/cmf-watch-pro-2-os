@@ -4,14 +4,22 @@ use serde_json::{Value, json};
 use std::fs::File;
 use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
+use std::time::Duration;
 
 pub const DEFAULT_ADDRESS: &str = "127.0.0.1:4660";
+const MAX_SIMULATED_LATENCY_MS: u64 = 10_000;
 
 pub fn run(address: &str) -> io::Result<()> {
+    let latency = configured_latency()?;
+    run_with_latency(address, latency)
+}
+
+fn run_with_latency(address: &str, latency: Duration) -> io::Result<()> {
     let listener = TcpListener::bind(address)?;
     eprintln!("CMF watch host listening on {address}");
+    eprintln!("host latency simulation: {} ms", latency.as_millis());
     for connection in listener.incoming() {
-        match connection.and_then(handle_connection) {
+        match connection.and_then(|stream| handle_connection(stream, latency)) {
             Ok(()) => eprintln!("watch disconnected"),
             Err(error) => eprintln!("connection error: {error}"),
         }
@@ -19,10 +27,10 @@ pub fn run(address: &str) -> io::Result<()> {
     Ok(())
 }
 
-fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
+fn handle_connection(mut stream: TcpStream, latency: Duration) -> io::Result<()> {
     eprintln!("watch connected from {}", stream.peer_addr()?);
     let mut next_id = 1;
-    send(&mut stream, &hello(next_id))?;
+    send_delayed(&mut stream, &hello(next_id), latency)?;
     next_id += 1;
     let mut decoder = FrameDecoder::default();
     let mut bytes = [0_u8; 2048];
@@ -38,23 +46,52 @@ fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
             eprintln!("received {} id={}", message.kind, message.id);
             if message.kind == "sync_request" {
                 let updates = synchronization_updates(next_id);
-                send(&mut stream, &updates[0])?;
+                send_delayed(&mut stream, &updates[0], latency)?;
                 next_id += 1;
                 if let Some(response) = response_for(&message, next_id) {
-                    send(&mut stream, &response)?;
+                    send_delayed(&mut stream, &response, latency)?;
                     next_id += 1;
                 }
                 for mut update in updates.into_iter().skip(1) {
                     update.id = next_id;
-                    send(&mut stream, &update)?;
+                    send_delayed(&mut stream, &update, latency)?;
                     next_id += 1;
                 }
             } else if let Some(response) = response_for(&message, next_id) {
-                send(&mut stream, &response)?;
+                send_delayed(&mut stream, &response, latency)?;
                 next_id += 1;
             }
         }
     }
+}
+
+fn configured_latency() -> io::Result<Duration> {
+    match std::env::var("CMF_HOST_LATENCY_MS") {
+        Ok(value) => parse_latency(&value),
+        Err(std::env::VarError::NotPresent) => Ok(Duration::ZERO),
+        Err(error) => Err(io::Error::new(io::ErrorKind::InvalidInput, error)),
+    }
+}
+
+fn parse_latency(value: &str) -> io::Result<Duration> {
+    let milliseconds = value.parse::<u64>().map_err(|_| {
+        io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "CMF_HOST_LATENCY_MS must be an integer from 0 to 10000",
+        )
+    })?;
+    if milliseconds > MAX_SIMULATED_LATENCY_MS {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "CMF_HOST_LATENCY_MS must be an integer from 0 to 10000",
+        ));
+    }
+    Ok(Duration::from_millis(milliseconds))
+}
+
+fn send_delayed(stream: &mut TcpStream, message: &Message, latency: Duration) -> io::Result<()> {
+    std::thread::sleep(latency);
+    send(stream, message)
 }
 
 fn send(stream: &mut TcpStream, message: &Message) -> io::Result<()> {
@@ -204,5 +241,15 @@ mod tests {
         )
         .unwrap();
         response_for(&sync, 3).unwrap().validate().unwrap();
+    }
+
+    #[test]
+    fn latency_configuration_is_bounded() {
+        assert_eq!(parse_latency("0").unwrap(), Duration::ZERO);
+        assert_eq!(parse_latency("100").unwrap(), Duration::from_millis(100));
+        assert_eq!(parse_latency("300").unwrap(), Duration::from_millis(300));
+        assert_eq!(parse_latency("1000").unwrap(), Duration::from_millis(1000));
+        assert!(parse_latency("slow").is_err());
+        assert!(parse_latency("10001").is_err());
     }
 }

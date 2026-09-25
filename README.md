@@ -25,6 +25,14 @@ cargo run --manifest-path host/Cargo.toml
 
 The simulator reconnects automatically to `127.0.0.1:4660`, performs the protocol hello/capabilities/synchronization sequence, and locally renders synchronized weather, steps, notifications, and music state. This TCP backend is simulator-only; no BLE or physical-watch access is involved.
 
+Development latency can be injected without blocking the watch runtime:
+
+```bash
+CMF_HOST_LATENCY_MS=1000 cargo run --manifest-path host/Cargo.toml
+```
+
+Accepted values are 0–10,000 milliseconds. The Phase 9 matrix covers 100 ms, 300 ms, 1,000 ms, and fully offline operation.
+
 Run all current checks with:
 
 ```bash
@@ -33,6 +41,7 @@ Run all current checks with:
 ./scripts/test-protocol.sh
 ./scripts/test-host.sh
 ./scripts/check-transport.sh
+./scripts/check-latency.sh
 ```
 
 ## Workspaces
