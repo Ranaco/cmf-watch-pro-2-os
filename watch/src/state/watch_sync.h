@@ -34,11 +34,7 @@ struct watch_sync_mutation {
 		uint32_t steps;
 		bool flag;
 		char text[96];
-		struct {
-			uint16_t count;
-			char title[48];
-			char body[96];
-		} notifications;
+		struct watch_notification_list notifications;
 	} value;
 };
 

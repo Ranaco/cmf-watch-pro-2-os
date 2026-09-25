@@ -6,6 +6,7 @@
 #include <zephyr/kernel.h>
 #include <lvgl.h>
 #include "cache/watch_cache.h"
+#include "cache/watch_cache_storage.h"
 #include "input/watch_input.h"
 #include "navigation/navigation.h"
 #include "renderer/renderer.h"
@@ -20,6 +21,7 @@ LOG_MODULE_REGISTER(watch_runtime);
 static struct watch_state state;
 static struct watch_navigation navigation;
 static struct watch_sync sync_state;
+static struct watch_cache_record cache;
 static bool runtime_ready;
 
 static void render_current(bool backwards)
@@ -44,9 +46,14 @@ static int handle_protocol_message(const struct watch_protocol_message *message,
 	}
 	if (result == WATCH_SYNC_CHANGED) {
 		state.connection = WATCH_CONNECTION_ONLINE;
+		state.host_data_stale = false;
+		state.host_data_updated_at_ms = watch_cache_storage_now_ms();
+		watch_cache_capture_sync(&cache, &state, watch_sync_revision(&sync_state),
+					 state.host_data_updated_at_ms);
+		(void)watch_cache_storage_save(&cache);
 		LOG_INF("State synchronized revision=%llu temp=%d steps=%u notifications=%u",
 			(unsigned long long)watch_sync_revision(&sync_state), state.temperature_c,
-			state.steps, state.notification_count);
+			state.steps, state.notifications.total_count);
 		if (runtime_ready) renderer_refresh(&state);
 	}
 	return 0;
@@ -61,6 +68,11 @@ static void handle_transport_event(enum transport_event event, void *context)
 	} else {
 		state.connection = WATCH_CONNECTION_OFFLINE;
 		watch_sync_disconnected(&sync_state);
+		if (cache.weather_meta.version > 0U) {
+			state.host_data_stale = true;
+			watch_cache_mark_stale(&cache, watch_cache_storage_now_ms());
+			(void)watch_cache_storage_save(&cache);
+		}
 	}
 	if (runtime_ready) renderer_refresh(&state);
 }
@@ -77,11 +89,26 @@ static void handle_action(enum renderer_action action)
 		changed = navigation_previous(&navigation);
 		backwards = true;
 		break;
+	case RENDERER_ACTION_NEXT_ITEM:
+		if (state.active_screen == WATCH_SCREEN_NOTIFICATIONS) {
+			changed = watch_state_notification_next(&state);
+		}
+		break;
+	case RENDERER_ACTION_PREVIOUS_ITEM:
+		if (state.active_screen == WATCH_SCREEN_NOTIFICATIONS) {
+			changed = watch_state_notification_previous(&state);
+		}
+		break;
 	default:
 		break;
 	}
 	if (changed) {
-		render_current(backwards);
+		if (action == RENDERER_ACTION_NEXT_ITEM ||
+		    action == RENDERER_ACTION_PREVIOUS_ITEM) renderer_refresh(&state);
+		else render_current(backwards);
+		watch_cache_capture_application(&cache, &state,
+						watch_cache_storage_now_ms());
+		(void)watch_cache_storage_save(&cache);
 	}
 }
 
@@ -95,7 +122,18 @@ int watch_runtime_run(void)
 	watch_state_init(&state);
 	watch_sync_init(&sync_state);
 	navigation_init(&navigation);
-	watch_cache_init();
+	watch_cache_init(&cache);
+	int cache_result = watch_cache_storage_load(&cache);
+	if (cache_result == 0 && watch_cache_restore(&cache, &state)) {
+		navigation_replace(&navigation, state.active_screen);
+		LOG_INF("Restored cache revision=%llu temp=%d steps=%u notifications=%u stale=%d",
+			(unsigned long long)cache.synchronized_revision,
+			state.temperature_c, state.steps, state.notifications.total_count,
+			state.host_data_stale);
+	} else if (cache_result == -EBADMSG) {
+		LOG_WRN("Ignoring invalid cache record");
+		watch_cache_init(&cache);
+	}
 	renderer_init(handle_action);
 	transport_init(handle_protocol_message, handle_transport_event, NULL);
 	if (watch_input_init() != 0) {

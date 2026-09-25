@@ -14,7 +14,7 @@ The desktop simulator uses the same Zephyr and LVGL application layer intended f
 | `input` | Gesture classification and normalized simulated hardware-button events; SDL pointer input remains supplied by Zephyr |
 | `state` | Central watch data, active-screen model, and strict host synchronization service |
 | `animation` | Direction-aware screen transition policy |
-| `cache` | Bounded-cache metadata contract; persistent storage is deferred |
+| `cache` | Fixed-size domain records, validation/checksum policy, and replaceable persistence adapter |
 | `transport` | Framed connection boundary with a simulator-only localhost TCP backend |
 
 `main.c` only enters the runtime. Renderer callbacks emit next/previous actions, the runtime applies them to navigation/state, and the renderer receives the resulting state. Horizontal gestures require a decisive 50-pixel movement and reject mostly vertical drags. No navigation path performs a host round trip.
@@ -39,3 +39,11 @@ The initial registry contains Home, Notifications, Music, Assistant, and Setting
 The Rust host listens on localhost TCP port 4660. The Zephyr `native_sim` build uses native offloaded sockets to connect without TAP setup, then passes bounded frames into the C protocol codec. The codec emits semantic messages only; the transport never writes `WatchState` and the renderer never observes socket state directly.
 
 Decoded state messages pass through the watch synchronization service. It atomically installs snapshots, buffers up to 16 pre-snapshot mutations, replays only contiguous revisions, rejects unregistered paths, and requests a fresh snapshot when it detects a revision gap. Only the resulting `WatchState` reaches the renderer.
+
+## Local cache
+
+The cache is a fixed-size record with a magic value, schema version, record size, and checksum. Weather, activity, up to four notifications, music, application position, connection revision, and the compiled asset generation each carry version/timestamp/stale metadata. Dynamic allocation and sensitive host data are excluded.
+
+The simulator storage adapter uses an atomic temporary-file rename only when `CMF_WATCH_CACHE_PATH` is set. The application runner supplies a path under `build/simulator`; automated tests use isolated temporary paths. A future hardware backend can replace this adapter without changing the cache model, state service, or renderer.
+
+Restoration always forces connection state offline and host-owned data stale. A successful synchronization refreshes the cache and clears the stale presentation. Horizontal gestures navigate pages; decisive vertical gestures browse the bounded notification list.

@@ -69,9 +69,8 @@ static int find_member(char *object_text, size_t length, const char *name,
 	}
 }
 
-static int parse_notifications(struct json_token *token, uint16_t *count,
-			       char *title, size_t title_capacity,
-			       char *body, size_t body_capacity)
+static int parse_notifications(struct json_token *token,
+			       struct watch_notification_list *notifications)
 {
 	if (token->type != JSON_TOK_ARRAY_START) return -EINVAL;
 	struct notification_json {
@@ -87,25 +86,28 @@ static int parse_notifications(struct json_token *token, uint16_t *count,
 	struct json_obj array;
 	if (json_arr_separate_object_parse_init(&array, token->start,
 						(size_t)(token->end - token->start)) < 0) return -EINVAL;
-	*count = 0;
-	title[0] = '\0';
-	body[0] = '\0';
+	memset(notifications, 0, sizeof(*notifications));
 	while (true) {
 		struct notification_json item = {0};
 		int result = json_arr_separate_parse_object(&array, fields, ARRAY_SIZE(fields), &item);
 		if (result < 0) return -EINVAL;
 		if (result == 0) return 0;
-		if (*count == 0U) {
+		if (notifications->stored_count < WATCH_NOTIFICATION_CAPACITY) {
+			struct watch_notification *destination =
+				&notifications->entries[notifications->stored_count];
 			if (item.title != NULL) {
-				strncpy(title, item.title, title_capacity - 1U);
-				title[title_capacity - 1U] = '\0';
+				strncpy(destination->title, item.title,
+					sizeof(destination->title) - 1U);
+				destination->title[sizeof(destination->title) - 1U] = '\0';
 			}
 			if (item.body != NULL) {
-				strncpy(body, item.body, body_capacity - 1U);
-				body[body_capacity - 1U] = '\0';
+				strncpy(destination->body, item.body,
+					sizeof(destination->body) - 1U);
+				destination->body[sizeof(destination->body) - 1U] = '\0';
 			}
+			notifications->stored_count++;
 		}
-		if (*count < UINT16_MAX) (*count)++;
+		if (notifications->total_count < UINT16_MAX) notifications->total_count++;
 	}
 }
 
@@ -170,9 +172,7 @@ static int parse_snapshot(const struct watch_protocol_message *message,
 			if (parse_u64(&pair.value, &steps) < 0 || steps > UINT32_MAX) return -EINVAL;
 			candidate->steps = (uint32_t)steps;
 		} else if (span_equal(pair.key, pair.key_len, "notifications")) {
-			if (parse_notifications(&pair.value, &candidate->notification_count,
-				candidate->notification_title, sizeof(candidate->notification_title),
-				candidate->notification_body, sizeof(candidate->notification_body)) < 0) return -EINVAL;
+			if (parse_notifications(&pair.value, &candidate->notifications) < 0) return -EINVAL;
 		}
 	}
 }
@@ -215,9 +215,7 @@ static int parse_mutation(const struct watch_protocol_message *message,
 	} else if (strcmp(path, "notifications") == 0 &&
 		   message->type == WATCH_MESSAGE_STATE_SET) {
 		mutation->path = WATCH_SYNC_PATH_NOTIFICATIONS;
-		if (parse_notifications(&value_token, &mutation->value.notifications.count,
-			mutation->value.notifications.title, sizeof(mutation->value.notifications.title),
-			mutation->value.notifications.body, sizeof(mutation->value.notifications.body)) < 0) return -EINVAL;
+		if (parse_notifications(&value_token, &mutation->value.notifications) < 0) return -EINVAL;
 	} else {
 		return -EPERM;
 	}
@@ -247,9 +245,7 @@ static void apply_mutation(struct watch_state *state, const struct watch_sync_mu
 		state->steps = mutation->value.steps;
 		break;
 	case WATCH_SYNC_PATH_NOTIFICATIONS:
-		state->notification_count = mutation->value.notifications.count;
-		strcpy(state->notification_title, mutation->value.notifications.title);
-		strcpy(state->notification_body, mutation->value.notifications.body);
+		state->notifications = mutation->value.notifications;
 		break;
 	}
 }

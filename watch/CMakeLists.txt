@@ -17,6 +17,7 @@ target_sources(app PRIVATE
   src/state/watch_sync.c
   src/animation/watch_animation.c
   src/cache/watch_cache.c
+  src/cache/watch_cache_storage.c
   src/protocol/watch_protocol.c
   src/transport/transport.c
 )

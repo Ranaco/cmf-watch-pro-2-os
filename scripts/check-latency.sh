@@ -43,7 +43,7 @@ for latency in 100 300 1000; do
   WATCH_PID=$!
 
   for _ in {1..200}; do
-    grep -q 'State synchronized revision=4 temp=24 steps=9632 notifications=1' "${WATCH_LOG}" && break
+    grep -q 'State synchronized revision=4 temp=24 steps=9632 notifications=3' "${WATCH_LOG}" && break
     if ! kill -0 "${HOST_PID}" 2>/dev/null || ! kill -0 "${WATCH_PID}" 2>/dev/null; then
       echo "Latency ${latency} ms run exited before synchronization." >&2
       sed -n '1,160p' "${HOST_LOG}" >&2
@@ -54,7 +54,7 @@ for latency in 100 300 1000; do
   done
 
   grep -q "host latency simulation: ${latency} ms" "${HOST_LOG}"
-  grep -q 'State synchronized revision=4 temp=24 steps=9632 notifications=1' "${WATCH_LOG}"
+  grep -q 'State synchronized revision=4 temp=24 steps=9632 notifications=3' "${WATCH_LOG}"
   stop_pair
 done
 

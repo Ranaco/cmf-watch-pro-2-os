@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 9 — first end-to-end host/watch simulator demo (complete).
+Phase 10 — bounded local cache (complete).
 
 ## Completed tasks
 
@@ -53,6 +53,12 @@ Phase 9 — first end-to-end host/watch simulator demo (complete).
 - Added bounded host latency injection through `CMF_HOST_LATENCY_MS`, with explicit validation for malformed and excessive values.
 - Verified automatic synchronization at 100 ms, 300 ms, and 1,000 ms of simulated host latency.
 - Verified the complete five-page carousel remains locally navigable with no host process running.
+- Replaced the cache placeholder with a fixed-size, schema-versioned, checksummed record and replaceable persistence adapter.
+- Cached weather, activity, four bounded notifications, music metadata, active page/notification position, synchronization revision, and compiled asset generation without dynamic allocation.
+- Added atomic simulator persistence behind `CMF_WATCH_CACHE_PATH`; normal runs store the record under `build/simulator` while tests use isolated temporary paths.
+- Restored cached data as explicitly stale while offline, then cleared the stale presentation after a successful host sync.
+- Added vertical notification browsing with a compact item position while preserving horizontal page navigation and the no-button UI.
+- Added cache validity, corruption detection, metadata, restoration, size-bound, and offline relaunch checks.
 
 ## Environment
 
@@ -82,7 +88,7 @@ The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Bu
 
 ## Next task
 
-Phase 10 — implement bounded watch-side caching for notifications, weather, music metadata, application state, and connection metadata, including timestamps, versions, and stale-state presentation. No BLE work.
+Phase 11 — implement optimistic local actions and command-result reconciliation, beginning with music play/pause while preserving the no-button interaction model. No BLE work.
 
 ## Hardware safety
 

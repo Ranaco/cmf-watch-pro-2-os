@@ -6,6 +6,8 @@
 enum renderer_action {
 	RENDERER_ACTION_NEXT,
 	RENDERER_ACTION_PREVIOUS,
+	RENDERER_ACTION_NEXT_ITEM,
+	RENDERER_ACTION_PREVIOUS_ITEM,
 };
 typedef void (*renderer_action_handler_t)(enum renderer_action action);
 void renderer_init(renderer_action_handler_t action_handler);

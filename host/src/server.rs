@@ -153,11 +153,23 @@ fn hello(id: u32) -> Message {
 fn default_state() -> Value {
     json!({
         "weather": { "temperature": 26, "condition": "Cloudy" },
-        "notifications": [{
-            "id": "notif_welcome",
-            "title": "Host connected",
-            "body": "Your watch data is synchronized."
-        }],
+        "notifications": [
+            {
+                "id": "notif_welcome",
+                "title": "Host connected",
+                "body": "Your watch data is synchronized."
+            },
+            {
+                "id": "notif_build",
+                "title": "Build complete",
+                "body": "The native simulator passed its checks."
+            },
+            {
+                "id": "notif_cache",
+                "title": "Offline ready",
+                "body": "Recent data is cached on the watch."
+            }
+        ],
         "music": { "title": "Ready to play", "playing": false },
         "calendar": [],
         "assistant": { "available": false },

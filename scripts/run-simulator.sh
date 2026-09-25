@@ -13,4 +13,5 @@ west build -p auto -b native_sim/native/64 \
   -d "${PROJECT_DIR}/build/simulator" \
   -- -DDTC_OVERLAY_FILE="${PROJECT_DIR}/watch/boards/native_sim.overlay"
 
+export CMF_WATCH_CACHE_PATH="${CMF_WATCH_CACHE_PATH:-${PROJECT_DIR}/build/simulator/watch-cache.bin}"
 exec "${PROJECT_DIR}/build/simulator/zephyr/zephyr.exe"

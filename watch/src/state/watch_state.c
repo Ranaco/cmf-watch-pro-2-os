@@ -27,9 +27,25 @@ void watch_state_reset_host_owned(struct watch_state *state)
 	strcpy(state->weather_condition, "Unavailable");
 	strcpy(state->music_title, "Nothing playing");
 	state->music_playing = false;
-	state->notification_count = 0;
-	state->notification_title[0] = '\0';
-	state->notification_body[0] = '\0';
+	memset(&state->notifications, 0, sizeof(state->notifications));
+	state->host_data_stale = false;
+	state->host_data_updated_at_ms = 0U;
+}
+
+bool watch_state_notification_next(struct watch_state *state)
+{
+	if (state->notifications.active_index + 1U >= state->notifications.stored_count) {
+		return false;
+	}
+	state->notifications.active_index++;
+	return true;
+}
+
+bool watch_state_notification_previous(struct watch_state *state)
+{
+	if (state->notifications.active_index == 0U) return false;
+	state->notifications.active_index--;
+	return true;
 }
 
 void watch_state_set_screen(struct watch_state *state, enum watch_screen screen)

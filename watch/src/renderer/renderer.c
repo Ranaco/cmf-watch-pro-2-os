@@ -63,8 +63,11 @@ static void gesture_event(lv_event_t *event)
 		swipe_tracking = false;
 		enum watch_swipe swipe = watch_swipe_classify(dx, dy);
 		if (handler != NULL && swipe != WATCH_SWIPE_NONE) {
-			handler(swipe == WATCH_SWIPE_NEXT
-				? RENDERER_ACTION_NEXT : RENDERER_ACTION_PREVIOUS);
+			enum renderer_action action = RENDERER_ACTION_PREVIOUS_ITEM;
+			if (swipe == WATCH_SWIPE_NEXT) action = RENDERER_ACTION_NEXT;
+			else if (swipe == WATCH_SWIPE_PREVIOUS) action = RENDERER_ACTION_PREVIOUS;
+			else if (swipe == WATCH_SWIPE_NEXT_ITEM) action = RENDERER_ACTION_NEXT_ITEM;
+			handler(action);
 		}
 	}
 }
@@ -86,9 +89,11 @@ static void gesture_layer_create(lv_obj_t *face)
 static void page_indicator(lv_obj_t *face, enum watch_screen screen)
 {
 	char text[16];
-	snprintf(text, sizeof(text), "< %02u/%02u >", (unsigned int)screen + 1U,
+	snprintf(text, sizeof(text), "%02u / %02u", (unsigned int)screen + 1U,
 		 (unsigned int)WATCH_SCREEN_COUNT);
 	lv_obj_t *object = label(face, text, &lv_font_unscii_16, MUTED);
+	lv_obj_set_width(object, 120);
+	lv_obj_set_style_text_align(object, LV_TEXT_ALIGN_CENTER, 0);
 	lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, -43);
 }
 
@@ -121,6 +126,10 @@ static void render_home(lv_obj_t *face, const struct watch_state *state)
 	lv_obj_align(object, LV_ALIGN_CENTER, 0, -16);
 	object = label(weather, condition, &lv_font_unscii_16, MUTED);
 	lv_obj_align(object, LV_ALIGN_CENTER, 0, 20);
+	if (state->host_data_stale) {
+		object = label(face, "CACHED", &lv_font_unscii_16, ACCENT);
+		lv_obj_align(object, LV_ALIGN_CENTER, 0, 66);
+	}
 	object = label(face, steps, &lv_font_unscii_16, lv_color_white());
 	lv_obj_align(object, LV_ALIGN_BOTTOM_MID, 0, -112);
 	page_indicator(face, state->active_screen);
@@ -130,19 +139,22 @@ static void render_app(lv_obj_t *face, const struct watch_state *state)
 {
 	bool notifications = state->active_screen == WATCH_SCREEN_NOTIFICATIONS;
 	bool music = state->active_screen == WATCH_SCREEN_MUSIC;
+	const struct watch_notification *notification =
+		state->notifications.stored_count > 0U
+		? &state->notifications.entries[state->notifications.active_index] : NULL;
 	const struct watch_app_descriptor *app =
 		app_registry_find(state->active_screen);
 	const char *title = app != NULL ? app->name : "Unknown";
-	const char *headline = notifications && state->notification_count > 0
-		? state->notification_title
+	const char *headline = notifications && notification != NULL
+		? notification->title
 		: (music ? state->music_title : (app != NULL ? app->headline : "Unavailable"));
-	const char *detail = notifications && state->notification_count > 0
-		? state->notification_body
+	const char *detail = notifications && notification != NULL
+		? notification->body
 		: (music ? (state->music_playing ? "Playing from your connected host"
 						 : "Playback is paused")
 			 : (app != NULL ? app->offline_message : "Application metadata is missing."));
 	const char *status = state->connection == WATCH_CONNECTION_ONLINE ? "HOST SYNCED"
-								      : "OFFLINE READY";
+		: (state->host_data_stale ? "CACHE / STALE" : "OFFLINE READY");
 	lv_obj_t *object = label(face, status, &lv_font_unscii_16,
 				 ACCENT);
 	lv_obj_align(object, LV_ALIGN_TOP_LEFT, 76, 48);
@@ -161,6 +173,14 @@ static void render_app(lv_obj_t *face, const struct watch_state *state)
 	lv_obj_align(object, LV_ALIGN_TOP_LEFT, 0, 0);
 	lv_obj_set_width(object, 310);
 	lv_label_set_long_mode(object, LV_LABEL_LONG_WRAP);
+	if (notifications && state->notifications.stored_count > 1U) {
+		char position[16];
+		snprintf(position, sizeof(position), "%02u / %02u",
+			 (unsigned int)state->notifications.active_index + 1U,
+			 (unsigned int)state->notifications.stored_count);
+		object = label(card, position, &lv_font_unscii_16, ACCENT);
+		lv_obj_align(object, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+	}
 	object = label(card, detail, &lv_font_unscii_16, MUTED);
 	lv_obj_align(object, LV_ALIGN_TOP_LEFT, 0, 36);
 	lv_obj_set_width(object, 310);

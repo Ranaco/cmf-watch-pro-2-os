@@ -4,7 +4,7 @@ A locally rendered LVGL watch runtime with a transport-independent host architec
 
 ## Current milestone
 
-Phase 8 complete: round simulator, layered runtime, five-page offline carousel, frozen protocol v1, Rust host service, Zephyr C codec, localhost TCP transport, and atomic host-state synchronization into the local UI.
+Phase 10 complete: round simulator, layered runtime, five-page offline carousel, frozen protocol v1, Rust host service, atomic host-state synchronization, latency resilience, and bounded persistent simulator caching.
 
 ## Run
 
@@ -15,7 +15,7 @@ cd /home/rana/watch
 ./scripts/run-simulator.sh
 ```
 
-The simulator renders locally. Swipe left or right anywhere on the round face to move through Home, Notifications, Music, Assistant, and Settings. The simulated hardware button (`R`) advances to the next page as a non-touch fallback. There are no on-screen navigation buttons, and no host connection is required.
+The simulator renders locally. Swipe left or right anywhere on the round face to move through Home, Notifications, Music, Assistant, and Settings. Swipe vertically on Notifications to browse up to four cached entries. The simulated hardware button (`R`) advances to the next page as a non-touch fallback. There are no on-screen navigation buttons, and no host connection is required.
 
 To exercise the host connection, start the Rust service in one terminal before launching the simulator:
 
@@ -33,6 +33,8 @@ CMF_HOST_LATENCY_MS=1000 cargo run --manifest-path host/Cargo.toml
 
 Accepted values are 0–10,000 milliseconds. The Phase 9 matrix covers 100 ms, 300 ms, 1,000 ms, and fully offline operation.
 
+`run-simulator.sh` stores a fixed-size, checksummed cache at `build/simulator/watch-cache.bin` by default. Set `CMF_WATCH_CACHE_PATH` to override it. Restored host data is visibly marked `CACHED` or `CACHE / STALE` until synchronization succeeds.
+
 Run all current checks with:
 
 ```bash
@@ -42,6 +44,7 @@ Run all current checks with:
 ./scripts/test-host.sh
 ./scripts/check-transport.sh
 ./scripts/check-latency.sh
+./scripts/check-cache.sh
 ```
 
 ## Workspaces
