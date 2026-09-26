@@ -1,0 +1,14 @@
+{
+  "artifact_set": "",
+  "acquired_at": "",
+  "acquisition_method": "official-download | device-readback | community-reference",
+  "device_firmware_version": "",
+  "device_model": "",
+  "inventory_manifest": "",
+  "notes": "",
+  "operator": "",
+  "original_source_url": "",
+  "redistribution_allowed": false,
+  "source_confidence": "confirmed | likely | unknown",
+  "tool_versions": {}
+}

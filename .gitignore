@@ -3,3 +3,6 @@
 *.log
 *.pyc
 __pycache__/
+/recovery/artifacts/
+*.bin
+*.fw

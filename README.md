@@ -54,6 +54,16 @@ SOAK_SECONDS=20 ./scripts/soak-test.sh
 
 Use `SOAK_SECONDS=3600 ./scripts/soak-test.sh` for the one-hour acceptance soak.
 
+## Rollback preparation
+
+The offline toolkit under `recovery/` inventories stock artifacts, verifies later copies, compares independent readbacks, and safely summarizes OTA metadata. It contains no device-access or firmware-write commands. Run its tests with:
+
+```bash
+./scripts/test-recovery-toolkit.sh
+```
+
+The first physical write remains a mandatory NO-GO until every item in `recovery/go-no-go.md` has evidence and restoration has succeeded on a donor watch.
+
 ## Workspaces
 
 - Project: `/home/rana/watch`

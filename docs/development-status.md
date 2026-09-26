@@ -73,6 +73,8 @@ Phase 19 — read-only platform research and non-flashable board scaffold (compl
 - Produced a compile-only reference ELF using Zephyr 2.7.0: 1,222,568 bytes flash, 311 KiB SRAM, and 5,796,192 bytes PSRAM; no packer, flash runner, DFU, or device operation ran.
 - Added a native platform capability contract and unit test, with unsupported BLE, battery, sensor, and crown capabilities deliberately absent.
 - Added a CMF Watch Pro 2 board scaffold with non-discoverable `.template` files and no fabricated pins, addresses, partitions, clocks, or memory values.
+- Added an offline rollback-preparation toolkit for artifact inventories, SHA-256 verification, independent-read comparison, and bounded OTA metadata summaries.
+- Added a private-data baseline worksheet, provenance template, and mandatory first-write recovery gate; no hardware-access or write command is included.
 
 ## Environment
 
@@ -103,7 +105,7 @@ The system ccache version (4.9.1) is below Zephyr's preferred minimum (4.12). Bu
 
 ## Next task
 
-Phase 20 is the BLE/device boundary. Do not begin it until the user explicitly chooses to proceed and the operation is separately scoped. The safest useful next work is simulator-side feature expansion or further read-only analysis of board evidence and recovery requirements.
+Continue offline rollback preparation by collecting legitimate stock-package provenance and completing the non-sensitive device baseline. Phase 20 remains the BLE/device boundary and requires separate scope; no write is allowed until the recovery gate passes on a donor watch.
 
 ## Hardware safety
 
